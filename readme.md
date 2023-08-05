@@ -2,8 +2,8 @@
 
 A tiny PKI for Home, Lab and Dev usage.
 
-setup documentation [setup](./docs/setup.md)
-usage documentation [usage](./docs/usage.md)
+- setup documentation [here](./docs/setup.md)
+- usage documentation [here](./docs/usage.md)
 
 ## Validity periods
 
@@ -40,7 +40,7 @@ only `golang.org/x` modules are used
 ## never a feature
 
 - HSM integration
-- CA renewal with new name 
+- CA renewal with new name
 - CA renewal with same key
 - Root private key export
 - RSA support
