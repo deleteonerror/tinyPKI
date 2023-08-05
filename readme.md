@@ -17,8 +17,8 @@ A tiny PKI for Home, Lab and Dev usage.
 
 The private key of the Certificate Authority
 
-- is chacha20 encrypted
-- is stored on the filesystem
+- is chacha20poly1305 encrypted
+- is stored on the filesystem with 0600 permissions
 
 The configuration
 
@@ -38,7 +38,7 @@ only `golang.org/x` modules are used
 - publish to LDAP
 - Yubikey as Hardware Key Storage
 
-## never a feature
+## Out of scope for this project
 
 - HSM integration
 - CA renewal with new name
