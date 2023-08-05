@@ -9,7 +9,7 @@ import (
 
 var RootPath string
 
-func init() {
+func Initialize() {
 
 	rootPath, exists := os.LookupEnv("TINY_ROOT_PATH")
 

@@ -16,11 +16,11 @@ import (
 func init() {
 	log.SetFlags(log.LstdFlags)
 	log.SetFlags(log.Flags() &^ (log.Lshortfile | log.Llongfile))
+	data.Initialize()
 }
 
 func main() {
 
-	// ToDo: run as daemon (only sub ca) and watch files in in/request and in in/revoke
 	if data.IsCaConfigured() {
 		pass := askPassphrase()
 		ca.VerifyAuthority(pass)
@@ -71,7 +71,8 @@ func askPassphrase() []byte {
 		os.Exit(1)
 	}
 
-	if len(bytePassword) < 12 {
+	// Info: if we init in debug and use it for production, we fail, because we are not able to enter a short passphrase on production
+	if len(bytePassword) < 12 && logger.LogSeverity != 0 {
 		fmt.Println("You take security serious! Try again ...")
 		return askPassphrase()
 	}
