@@ -14,11 +14,23 @@ build-sub:
 build-req:
 	go build -o bin/tpkireq -v cmd/tpkireq/main.go 
 
-run-root: build-root
+config-sub:
+	cp configs/tinypki.sub.example.json bin/config.json
+
+config-root:
+	cp configs/tinypki.root.example.json bin/config.json
+
+run-root: build-root config-root
 	./bin/tpkiroot
 
-run-sub: build-sub
+rerun-root:
+	./bin/tpkiroot
+
+run-sub: build-sub config-sub
 	./bin/tpkisub
+
+rerun-sub:
+	 ./bin/tpkisub
 
 run-req: build-req
 	./bin/tpkireq
@@ -29,6 +41,7 @@ clean:
 	rm -f bin/tpkisub 
 	rm -f bin/tpkireq
 	rm -rf bin/work
+	rm -rf bin/store
 
 deps:
 	go mod download
