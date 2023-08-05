@@ -1,0 +1,7 @@
+{
+    "common_name": "tiny pki test Sub CA",
+    "country_iso": "DE",
+    "organization": "Delete on error",
+    "organizational_unit": "code monkeys",
+    "base_url": "http://pki.example.com"
+}
