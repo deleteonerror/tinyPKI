@@ -1,16 +1,13 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
-	"syscall"
 
 	"deleteonerror.com/tyinypki/internal/ca"
 	"deleteonerror.com/tyinypki/internal/data"
 	"deleteonerror.com/tyinypki/internal/logger"
-	"deleteonerror.com/tyinypki/internal/model"
-	"golang.org/x/term"
+	"deleteonerror.com/tyinypki/internal/terminal"
 )
 
 func init() {
@@ -22,15 +19,15 @@ func init() {
 func main() {
 
 	if data.IsCaConfigured() {
-		pass := askPassphrase()
+		pass := terminal.AskPassphrase()
 		ca.VerifyAuthority(pass)
 	} else {
 		config, err := data.ReadSetupConfiguration()
 		if err != nil {
 			logger.Warning("Configuration not found.")
-			config = getConfigInteractive()
+			config = terminal.GetRootConfigInteractive()
 		}
-		pass := askPassphrase()
+		pass := terminal.AskPassphrase()
 		data.SetupFolders()
 		err = ca.SetupAuthority(config, pass)
 		if err != nil {
@@ -42,40 +39,4 @@ func main() {
 	if err != nil {
 		logger.Error("Issuance of pending request Failed: %v", err)
 	}
-}
-
-func getConfigInteractive() model.SetupConfig {
-
-	config := &model.SetupConfig{}
-	fmt.Print("Could not open config file, please enter configuration.")
-	fmt.Print("Enter comon name [Tiny pki Root CA]: ")
-	fmt.Scan(&config.Name)
-	fmt.Print("Enter country ISO code [US]: ")
-	fmt.Scan(&config.Country)
-	fmt.Print("Enter organization [Delete on error]:")
-	fmt.Scan(&config.Organization)
-	fmt.Print("Enter organizational unit [code monkeys]: ")
-	fmt.Scan(&config.OrganizationalUnit)
-	fmt.Print("Enter base url [http://pki.example.com]: ")
-	fmt.Scan(&config.BaseUrl)
-
-	return *config
-}
-
-func askPassphrase() []byte {
-	fmt.Print("Enter Password [min 12 characters]: ")
-	bytePassword, err := term.ReadPassword(int(syscall.Stdin))
-	fmt.Print("\n")
-	if err != nil {
-		logger.Error("Failed to read pass phrase from terminal: %s", err)
-		os.Exit(1)
-	}
-
-	// Info: if we init in debug and use it for production, we fail, because we are not able to enter a short passphrase on production
-	if len(bytePassword) < 12 && logger.LogSeverity != 0 {
-		fmt.Println("You take security serious! Try again ...")
-		return askPassphrase()
-	}
-
-	return bytePassword
 }
