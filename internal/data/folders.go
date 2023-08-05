@@ -47,7 +47,7 @@ func createAndLogDir(f folder) {
 	if err != nil {
 		logger.Error("Failed to create directory %v", err)
 	} else {
-		logger.Info("Created %s as %s directory at %s", f.name, f.dirType, f.path)
+		logger.Debug("Created %s as %s directory at %s", f.name, f.dirType, f.path)
 	}
 }
 

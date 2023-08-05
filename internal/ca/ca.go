@@ -31,7 +31,8 @@ func VerifyAuthority(pass []byte) {
 
 	if cert.NotAfter.Before(time.Now().AddDate(0, 0, 90)) {
 		logger.Warning("Root cert will expire in less than 90 days.")
-
+	} else {
+		logger.Info("Root certificate ist valid.")
 	}
 
 	crl, err := getLatestCRL()
@@ -39,11 +40,14 @@ func VerifyAuthority(pass []byte) {
 		logger.Error("Unable not read last CRL: %v", err)
 	}
 	if crl == nil {
+		logger.Info("No published crls found.")
 		return
 	}
 
 	if crl.NextUpdate.Before(time.Now().AddDate(0, 0, 30)) {
 		logger.Warning("CRL will expire in less than 30 days")
+	} else {
+		logger.Info("last published crl ist valid.")
 	}
 
 }
