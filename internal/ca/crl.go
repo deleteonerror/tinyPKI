@@ -24,6 +24,10 @@ func PublishRevocationList() error {
 		return err
 	}
 
+	if file == "" {
+		return nil
+	}
+
 	cert := getCaCertificate()
 
 	data.Publish(file, cert.Subject.CommonName+".crl")
@@ -37,7 +41,6 @@ func getLatestCRL() (*x509.RevocationList, error) {
 		return nil, err
 	}
 	if len(data) == 0 {
-		logger.Error("%v", err)
 		return nil, nil
 	}
 
@@ -57,7 +60,6 @@ func getNextCRLNumber() (*big.Int, error) {
 		return nil, err
 	}
 	if data == nil {
-		logger.Error("%v", err)
 		return new(big.Int), nil
 	}
 

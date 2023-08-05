@@ -143,38 +143,38 @@ func GetLatestCRL() ([]byte, error) {
 	src := getFolderByName("ca-crl")
 
 	var maxNum int
-	var maxFile fs.DirEntry
+	var maxFile string
 
-	err := filepath.WalkDir(src.path, func(path string, d fs.DirEntry, err error) error {
-		if err != nil {
-			logger.Error("%v", err)
-			return err
-		}
-
-		if filepath.Ext(d.Name()) == ".crl" {
-			numStr := strings.TrimSuffix(d.Name(), ".crl")
-			num, err := strconv.Atoi(numStr)
+	err := filepath.WalkDir(src.path,
+		func(path string, d fs.DirEntry, err error) error {
 			if err != nil {
-				logger.Error("Error converting string to number: %s", err)
-				return nil
+				logger.Error("%v", err)
+				return err
 			}
 
-			if num > maxNum {
-				maxNum = num
-				maxFile = d
-			}
-		}
+			if filepath.Ext(d.Name()) == ".crl" {
+				numStr := strings.TrimSuffix(d.Name(), ".crl")
+				num, err := strconv.Atoi(numStr)
+				if err != nil {
+					logger.Error("Error converting string to number: %s", err)
+					return nil
+				}
 
-		return nil
-	})
+				if num >= maxNum {
+					maxNum = num
+					maxFile = path
+				}
+			}
+			return nil
+		})
 
 	if err != nil {
 		logger.Error("%v", err)
 		return nil, err
 	}
 
-	if maxFile != nil {
-		file, err := os.Open(maxFile.Name())
+	if maxFile != "" {
+		file, err := os.Open(maxFile)
 		if err != nil {
 			logger.Error("%v", err)
 			return nil, err
@@ -198,8 +198,10 @@ func WriteCRL(data []byte, id string) (string, error) {
 	src := getFolderByName("ca-crl")
 	moveOld(*src, filename)
 
+	path := filepath.Join(src.path, filename)
+
 	file, err := os.OpenFile(
-		filepath.Join(src.path, filename),
+		path,
 		os.O_WRONLY|os.O_TRUNC|os.O_CREATE,
 		0600,
 	)
@@ -214,7 +216,7 @@ func WriteCRL(data []byte, id string) (string, error) {
 		logger.Error("%v", err)
 		return "", err
 	}
-	return filename, nil
+	return path, nil
 
 }
 
