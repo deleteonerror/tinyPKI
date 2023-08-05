@@ -53,21 +53,25 @@ func SetupAuthority(conf model.SetupConfig, pass []byte) error {
 
 	privateKey, err := createPrivateKey(pass)
 	if err != nil {
+		logger.Error("%v", err)
 		return err
 	}
 
 	publicKey, err := x509.MarshalPKIXPublicKey(&privateKey.PublicKey)
 	if err != nil {
+		logger.Error("%v", err)
 		return err
 	}
 	ski := sha256.Sum256(publicKey)
 
 	cdp, err := url.JoinPath(conf.BaseUrl, url.PathEscape(conf.Name+".crl"))
 	if err != nil {
+		logger.Error("%v", err)
 		return err
 	}
 	aia, err := url.JoinPath(conf.BaseUrl, url.PathEscape(conf.Name+".cer"))
 	if err != nil {
+		logger.Error("%v", err)
 		return err
 	}
 
@@ -99,6 +103,7 @@ func SetupAuthority(conf model.SetupConfig, pass []byte) error {
 
 	certBytes, err := x509.CreateCertificate(rand.Reader, caCert, caCert, &privateKey.PublicKey, privateKey) // &key
 	if err != nil {
+		logger.Error("%v", err)
 		return err
 	}
 
@@ -106,16 +111,19 @@ func SetupAuthority(conf model.SetupConfig, pass []byte) error {
 
 	_, err = data.WriteCertificate(certBytes, caCert.Subject.CommonName+"_"+hex.EncodeToString(caCert.SubjectKeyId))
 	if err != nil {
+		logger.Error("%v", err)
 		return err
 	}
 	// We store the latest CA cert also with the filename ca.cer
 	file, err := data.WriteCertificate(certBytes, "ca")
 	if err != nil {
+		logger.Error("%v", err)
 		return err
 	}
 	data.Publish(file, conf.Name+".cer")
 	err = PublishRevocationList()
 	if err != nil {
+		logger.Error("%v", err)
 		return err
 	}
 
@@ -128,12 +136,13 @@ func getPrivateKey() ecdsa.PrivateKey {
 	if pKey.D == nil {
 		raw, err := getRawPrivateKey(PassPhrase)
 		if err != nil {
-			logger.Error("Cold not read Private Key file: %v", err)
-
+			logger.Error("Cold not read Private Key, wrong passphrase or corupted key file.")
+			os.Exit(1)
 		}
 		key, err := x509.ParseECPrivateKey(raw)
 		if err != nil {
 			logger.Error("Cold not parse Private Key file: %v", err)
+			os.Exit(1)
 		}
 		pKey = *key
 		logger.Debug("Private Key loaded.")
@@ -148,21 +157,25 @@ func getRawPrivateKey(pass []byte) ([]byte, error) {
 
 	aead, err := chacha20poly1305.NewX(encKey[:])
 	if err != nil {
+		logger.Error("%v", err)
 		return nil, err
 	}
 
 	nonce, err := data.ReadKeyNonce()
 	if err != nil {
+		logger.Error("%v", err)
 		return nil, err
 	}
 
 	encryptedKey, err := data.ReadKey()
 	if err != nil {
+		logger.Error("%v", err)
 		return nil, err
 	}
 
 	x509DerEncoded, err := aead.Open(nil, nonce, encryptedKey, nil)
 	if err != nil {
+		logger.Error("%v", err)
 		return nil, err
 	}
 
@@ -173,17 +186,20 @@ func createPrivateKey(pass []byte) (*ecdsa.PrivateKey, error) {
 	curve := elliptic.P384()
 	ecKey, err := ecdsa.GenerateKey(curve, rand.Reader)
 	if err != nil {
+		logger.Error("%v", err)
 		return nil, err
 	}
 
 	x509DerEncoded, err := x509.MarshalECPrivateKey(ecKey)
 	if err != nil {
+		logger.Error("%v", err)
 		return nil, err
 	}
 
 	encKey := sha256.Sum256([]byte(pass))
 	aead, err := chacha20poly1305.NewX(encKey[:])
 	if err != nil {
+		logger.Error("%v", err)
 		return nil, err
 	}
 
@@ -191,6 +207,7 @@ func createPrivateKey(pass []byte) (*ecdsa.PrivateKey, error) {
 
 	_, err = rand.Read(nonce)
 	if err != nil {
+		logger.Error("%v", err)
 		return nil, err
 	}
 

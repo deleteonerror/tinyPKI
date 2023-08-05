@@ -14,8 +14,8 @@ import (
 )
 
 func init() {
-	log.SetFlags(log.LstdFlags | log.Lshortfile)
-	logger.LogSeverity = logger.DEBUG
+	log.SetFlags(log.LstdFlags)
+	log.SetFlags(log.Flags() &^ (log.Lshortfile | log.Llongfile))
 }
 
 func main() {
@@ -72,7 +72,7 @@ func askPassphrase() []byte {
 	}
 
 	if len(bytePassword) < 12 {
-		fmt.Print("You take security serious! Try again")
+		fmt.Println("You take security serious! Try again ...")
 		return askPassphrase()
 	}
 

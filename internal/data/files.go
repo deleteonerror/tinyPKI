@@ -88,12 +88,14 @@ func WriteKeyNonce(nonce []byte) error {
 		0600,
 	)
 	if err != nil {
+		logger.Error("%v", err)
 		return err
 	}
 	defer file.Close()
 
 	_, err = file.Write(nonce)
 	if err != nil {
+		logger.Error("%v", err)
 		return err
 	}
 	return nil
@@ -105,6 +107,7 @@ func ReadKeyNonce() ([]byte, error) {
 
 	nonce, err := os.ReadFile(filepath.Join(src.path, "ca.key.nonce"))
 	if err != nil {
+		logger.Error("%v", err)
 		return nil, err
 	}
 
@@ -116,6 +119,7 @@ func ReadCaCertificate() ([]byte, error) {
 
 	cert, err := os.ReadFile(filepath.Join(src.path, "ca.cer"))
 	if err != nil {
+		logger.Error("%v", err)
 		return nil, err
 	}
 
@@ -128,6 +132,7 @@ func ReadKey() ([]byte, error) {
 
 	encryptedData, err := os.ReadFile(filepath.Join(src.path, "ca.key"))
 	if err != nil {
+		logger.Error("%v", err)
 		return nil, err
 	}
 
@@ -142,6 +147,7 @@ func GetLatestCRL() ([]byte, error) {
 
 	err := filepath.WalkDir(src.path, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
+			logger.Error("%v", err)
 			return err
 		}
 
@@ -163,18 +169,21 @@ func GetLatestCRL() ([]byte, error) {
 	})
 
 	if err != nil {
+		logger.Error("%v", err)
 		return nil, err
 	}
 
 	if maxFile != nil {
 		file, err := os.Open(maxFile.Name())
 		if err != nil {
+			logger.Error("%v", err)
 			return nil, err
 		}
 		defer file.Close()
 
 		content, err := io.ReadAll(file)
 		if err != nil {
+			logger.Error("%v", err)
 			return nil, err
 		}
 
@@ -195,12 +204,14 @@ func WriteCRL(data []byte, id string) (string, error) {
 		0600,
 	)
 	if err != nil {
+		logger.Error("%v", err)
 		return "", err
 	}
 	defer file.Close()
 
 	_, err = file.Write(data)
 	if err != nil {
+		logger.Error("%v", err)
 		return "", err
 	}
 	return filename, nil
@@ -214,6 +225,7 @@ func GetRevokedCertificates() ([][]byte, error) {
 
 	files, err := os.ReadDir(targetFolder.path)
 	if err != nil {
+		logger.Error("%v", err)
 		return nil, err
 	}
 
@@ -221,6 +233,7 @@ func GetRevokedCertificates() ([][]byte, error) {
 		if !file.IsDir() {
 			data, err := os.ReadFile(filepath.Join(targetFolder.path, file.Name()))
 			if err != nil {
+				logger.Error("%v", err)
 				return nil, err
 			}
 
@@ -243,6 +256,7 @@ func GetCertificateRequests() ([]FileData, error) {
 
 	files, err := os.ReadDir(targetFolder.path)
 	if err != nil {
+		logger.Error("%v", err)
 		return nil, err
 	}
 
@@ -251,6 +265,7 @@ func GetCertificateRequests() ([]FileData, error) {
 
 			data, err := os.ReadFile(filepath.Join(targetFolder.path, file.Name()))
 			if err != nil {
+				logger.Error("%v", err)
 				return nil, err
 			}
 
@@ -269,23 +284,27 @@ func Publish(src string, destName string) error {
 
 	srcFile, err := os.Open(src)
 	if err != nil {
+		logger.Error("%v", err)
 		return err
 	}
 	defer srcFile.Close()
 
 	dstFile, err := os.Create(filepath.Join(destFolder.path, destName))
 	if err != nil {
+		logger.Error("%v", err)
 		return err
 	}
 	defer dstFile.Close()
 
 	_, err = io.Copy(dstFile, srcFile)
 	if err != nil {
+		logger.Error("%v", err)
 		return err
 	}
 
 	err = dstFile.Sync()
 	if err != nil {
+		logger.Error("%v", err)
 		return err
 	}
 	return nil

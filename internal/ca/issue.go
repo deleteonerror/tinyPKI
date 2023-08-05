@@ -16,6 +16,7 @@ import (
 func IssuePendingRequests() error {
 	requests, err := data.GetCertificateRequests()
 	if err != nil {
+		logger.Error("%v", err)
 		return err
 	}
 
@@ -46,17 +47,20 @@ func createIntermediateCertificate(csr *x509.CertificateRequest) error {
 	serialNumberLimit := new(big.Int).Lsh(big.NewInt(1), 128)
 	serialNumber, err := rand.Int(rand.Reader, serialNumberLimit)
 	if err != nil {
+		logger.Error("%v", err)
 		return err
 	}
 
 	publicKey, err := x509.MarshalPKIXPublicKey(&csr.PublicKey)
 	if err != nil {
+		logger.Error("%v", err)
 		return err
 	}
 	ski := sha256.Sum256(publicKey)
 	// todo get baseurl
 	cdp, err := url.JoinPath("", url.PathEscape(csr.Subject.CommonName+".crl"))
 	if err != nil {
+		logger.Error("%v", err)
 		return err
 	}
 
@@ -78,11 +82,13 @@ func createIntermediateCertificate(csr *x509.CertificateRequest) error {
 
 	certBytes, err := x509.CreateCertificate(rand.Reader, template, &cert, csr.PublicKey, getPrivateKey())
 	if err != nil {
+		logger.Error("%v", err)
 		return err
 	}
 
 	file, err := data.WriteCertificate(certBytes, cert.Subject.CommonName+"_"+hex.EncodeToString(ski[:]))
 	if err != nil {
+		logger.Error("%v", err)
 		return err
 	}
 

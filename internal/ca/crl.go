@@ -9,15 +9,18 @@ import (
 	"time"
 
 	"deleteonerror.com/tyinypki/internal/data"
+	"deleteonerror.com/tyinypki/internal/logger"
 )
 
 func PublishRevocationList() error {
 	n, err := getNextCRLNumber()
 	if err != nil {
+		logger.Error("%v", err)
 		return err
 	}
 	file, err := generateCRL(n)
 	if err != nil {
+		logger.Error("%v", err)
 		return err
 	}
 
@@ -30,15 +33,18 @@ func PublishRevocationList() error {
 func getLatestCRL() (*x509.RevocationList, error) {
 	data, err := data.GetLatestCRL()
 	if err != nil {
+		logger.Error("%v", err)
 		return nil, err
 	}
 	if len(data) == 0 {
+		logger.Error("%v", err)
 		return nil, nil
 	}
 
 	block, _ := pem.Decode(data)
 	crl, err := x509.ParseRevocationList(block.Bytes)
 	if err != nil {
+		logger.Error("%v", err)
 		return nil, err
 	}
 	return crl, nil
@@ -47,15 +53,18 @@ func getLatestCRL() (*x509.RevocationList, error) {
 func getNextCRLNumber() (*big.Int, error) {
 	data, err := data.GetLatestCRL()
 	if err != nil {
+		logger.Error("%v", err)
 		return nil, err
 	}
 	if data == nil {
+		logger.Error("%v", err)
 		return new(big.Int), nil
 	}
 
 	block, _ := pem.Decode(data)
 	crl, err := x509.ParseRevocationList(block.Bytes)
 	if err != nil {
+		logger.Error("%v", err)
 		return nil, err
 	}
 
@@ -68,16 +77,19 @@ func generateCRL(number *big.Int) (string, error) {
 
 	rawCerts, err := data.GetRevokedCertificates()
 	if err != nil {
+		logger.Error("%v", err)
 		return "", err
 	}
 
 	revokedCertificates, err := convertCertificatesToCRL(rawCerts)
 	if err != nil {
+		logger.Error("%v", err)
 		return "", err
 	}
 
 	nextId, err := getNextCRLNumber()
 	if err != nil {
+		logger.Error("%v", err)
 		return "", err
 	}
 
@@ -101,6 +113,7 @@ func generateCRL(number *big.Int) (string, error) {
 	privkey := getPrivateKey()
 	crlBytes, err := x509.CreateRevocationList(rand.Reader, crlTemplate, &cert, &privkey)
 	if err != nil {
+		logger.Error("%v", err)
 		return "", err
 	}
 
@@ -111,6 +124,7 @@ func generateCRL(number *big.Int) (string, error) {
 
 	filename, err := data.WriteCRL(pem.EncodeToMemory(crlPemBlock), nextId.String())
 	if err != nil {
+		logger.Error("%v", err)
 		return "", err
 	}
 
@@ -123,6 +137,7 @@ func convertCertificatesToCRL(certificates [][]byte) ([]pkix.RevokedCertificate,
 	for _, data := range certificates {
 		cert, err := x509.ParseCertificate(data)
 		if err != nil {
+			logger.Error("%v", err)
 			return nil, err
 		}
 
