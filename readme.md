@@ -30,6 +30,7 @@ only `golang.org/x` modules are used
 
 ## maybe feature
 
+- file system watcher for the sub ca `fsnotify`
 - passphrase file
 - docker image
   - docker secret files support

@@ -9,7 +9,7 @@ import (
 
 var RootPath string
 
-func Initialize() {
+func Initialize(addReqOut bool) {
 
 	rootPath, exists := os.LookupEnv("TINY_ROOT_PATH")
 
@@ -43,4 +43,9 @@ func Initialize() {
 	logger.Info("loglevel is %d", logger.LogSeverity)
 
 	initFolders()
+
+	if addReqOut {
+		addRequestOut()
+	}
+
 }

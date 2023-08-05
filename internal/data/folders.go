@@ -22,6 +22,8 @@ var folders []folder
 
 func initFolders() {
 	folders = []folder{
+		{"ca-cer", filepath.Join(RootPath, "store"), 0700, "store"},
+		{"ca-cer-old", filepath.Join(RootPath, "store", ".old"), 0700, "store"},
 		{"ca-key", filepath.Join(RootPath, "store", "private"), 0700, "store"},              // The folder for Private Keys
 		{"ca-key-old", filepath.Join(RootPath, "store", "private", ".old"), 0700, "store"},  // The folder for archived Private Keys
 		{"ca-revoked", filepath.Join(RootPath, "store", "revoked"), 0700, "store"},          // The folder for revoked certificates
@@ -34,6 +36,14 @@ func initFolders() {
 		{"ca-publish", filepath.Join(RootPath, "work", "publish"), 0755, "out"},             // Out folder which contains ca certs and crl's for publishing to aia and cdp
 		{"ca-publish-old", filepath.Join(RootPath, "work", "publish", ".old"), 0755, "out"}, // Out folder which contains archived ca certs and crl's
 	}
+}
+
+func addRequestOut() {
+	reqOut := []folder{
+		{"ca-req", filepath.Join(RootPath, "work", "carequest"), 0755, "out"},
+		{"cert-in", filepath.Join(RootPath, "work", "cacert"), 0755, "in"},
+	}
+	folders = append(folders, reqOut...)
 }
 
 func SetupFolders() {
@@ -56,6 +66,11 @@ type folder struct {
 	path    string
 	perms   os.FileMode
 	dirType string
+}
+
+func GetPathByName(name string) string {
+	folder := getFolderByName(name)
+	return folder.path
 }
 
 func getFolderByName(name string) *folder {

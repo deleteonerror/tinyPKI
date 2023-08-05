@@ -28,6 +28,9 @@ func VerifyAuthority(pass []byte) {
 	getPrivateKey()
 
 	cert := getCaCertificate()
+	if len(cert.Raw) == 0 {
+		os.Exit(1)
+	}
 
 	if cert.NotAfter.Before(time.Now().AddDate(0, 0, 90)) {
 		logger.Warning("Root cert will expire in less than 90 days.")
@@ -113,13 +116,13 @@ func SetupAuthority(conf model.SetupConfig, pass []byte) error {
 
 	caCert, _ = x509.ParseCertificate(certBytes)
 
-	_, err = data.WriteCertificate(certBytes, caCert.Subject.CommonName+"_"+hex.EncodeToString(caCert.SubjectKeyId))
+	_, err = data.WriteRawIssuedCertificate(certBytes, caCert.Subject.CommonName+"_"+hex.EncodeToString(caCert.SubjectKeyId))
 	if err != nil {
 		logger.Error("%v", err)
 		return err
 	}
-	// We store the latest CA cert also with the filename ca.cer
-	file, err := data.WriteCertificate(certBytes, "ca")
+
+	file, err := data.WriteRawCaCertificate(certBytes)
 	if err != nil {
 		logger.Error("%v", err)
 		return err
@@ -230,7 +233,7 @@ func getCaCertificate() x509.Certificate {
 		derCert, err := data.ReadCaCertificate()
 		if err != nil {
 			logger.Error("Cold not read Certificate file: %v", err)
-			os.Exit(1)
+			return x509.Certificate{}
 		}
 		block, _ := pem.Decode(derCert)
 

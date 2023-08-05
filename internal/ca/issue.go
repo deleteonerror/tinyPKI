@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"crypto/x509"
 	"encoding/hex"
+	"encoding/pem"
 	"math/big"
 	"net/url"
 	"time"
@@ -25,7 +26,10 @@ func IssuePendingRequests() error {
 	}
 
 	for _, req := range requests {
-		x509Req, err := x509.ParseCertificateRequest(req.Data)
+
+		block, _ := pem.Decode(req.Data)
+
+		x509Req, err := x509.ParseCertificateRequest(block.Bytes)
 		if err != nil {
 			logger.Error("Failed to parse request %s: %v", req.Name, err)
 			continue
@@ -51,7 +55,7 @@ func createIntermediateCertificate(csr *x509.CertificateRequest) error {
 		return err
 	}
 
-	publicKey, err := x509.MarshalPKIXPublicKey(&csr.PublicKey)
+	publicKey, err := x509.MarshalPKIXPublicKey(csr.PublicKey)
 	if err != nil {
 		logger.Error("%v", err)
 		return err
@@ -79,14 +83,15 @@ func createIntermediateCertificate(csr *x509.CertificateRequest) error {
 	}
 
 	cert := getCaCertificate()
+	key := getPrivateKey()
 
-	certBytes, err := x509.CreateCertificate(rand.Reader, template, &cert, csr.PublicKey, getPrivateKey())
+	certBytes, err := x509.CreateCertificate(rand.Reader, template, &cert, csr.PublicKey, &key)
 	if err != nil {
 		logger.Error("%v", err)
 		return err
 	}
 
-	file, err := data.WriteCertificate(certBytes, cert.Subject.CommonName+"_"+hex.EncodeToString(ski[:]))
+	file, err := data.WriteRawIssuedCertificate(certBytes, cert.Subject.CommonName+"_"+hex.EncodeToString(ski[:]))
 	if err != nil {
 		logger.Error("%v", err)
 		return err

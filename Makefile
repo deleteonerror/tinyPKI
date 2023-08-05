@@ -1,8 +1,4 @@
 
-# # Cross compilation
-# build-linux:
-# 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 $(GOBUILD) -o $(BINARY_UNIX) -v
-
 export TINY_LOG=Debug
 
 build-all: build-root build-sub build-req
@@ -21,12 +17,16 @@ config-root:
 	cp configs/tinypki.root.example.json bin/config.json
 
 run-root: build-root config-root
+	mkdir -p $(CURDIR)/bin/root_data
+	export TINY_ROOT_PATH=$(CURDIR)/bin/root_data; \
 	./bin/tpkiroot
 
 rerun-root:
 	./bin/tpkiroot
 
 run-sub: build-sub config-sub
+	mkdir -p $(CURDIR)/bin/sub_data
+	export TINY_ROOT_PATH=$(CURDIR)/bin/sub_data; \
 	./bin/tpkisub
 
 rerun-sub:
@@ -40,8 +40,8 @@ clean:
 	rm -f bin/tpkiroot
 	rm -f bin/tpkisub 
 	rm -f bin/tpkireq
-	rm -rf bin/work
-	rm -rf bin/store
+	rm -rf bin/sub_data
+	rm -rf bin/root_data
 
 deps:
 	go mod download

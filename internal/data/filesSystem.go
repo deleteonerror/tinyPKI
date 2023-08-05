@@ -17,5 +17,15 @@ func IsCaConfigured() bool {
 	} else {
 		logger.Warning("Could not read private key file: %v", err)
 	}
+
+	_, err = os.Stat(filepath.Join(getFolderByName("ca-cer").path, "ca.cer"))
+	if err == nil {
+		return true
+	} else if os.IsNotExist(err) {
+		return false
+	} else {
+		logger.Warning("Could not read private key file: %v", err)
+	}
+
 	return false
 }

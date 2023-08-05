@@ -13,7 +13,7 @@ import (
 func init() {
 	log.SetFlags(log.LstdFlags)
 	log.SetFlags(log.Flags() &^ (log.Lshortfile | log.Llongfile))
-	data.Initialize()
+	data.Initialize(false)
 }
 
 func main() {

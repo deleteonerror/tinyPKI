@@ -17,7 +17,6 @@ import (
 
 func ReadSetupConfiguration() (model.SetupConfig, error) {
 
-	// move this config file to work
 	file, err := os.Open(filepath.Join(RootPath, "config.json"))
 	if err != nil {
 		return model.SetupConfig{}, err
@@ -33,19 +32,75 @@ func ReadSetupConfiguration() (model.SetupConfig, error) {
 	return config, nil
 }
 
-func WriteCertificate(certBytes []byte, filename string) (string, error) {
+func WriteRawIssuedCertificate(certBytes []byte, filename string) (string, error) {
 
-	filename = filename + ".cer"
+	folder := getFolderByName("ca-issued")
+	path := filepath.Join(folder.path, filename+".cer")
 
-	src := getFolderByName("ca-issued")
+	err := writeRawX509Cert(certBytes, path)
+	if err != nil {
+		return "", err
+	}
+
+	return path, nil
+}
+
+func WriteRawCaCertificate(certBytes []byte) (string, error) {
+
+	folder := getFolderByName("ca-cer")
+	path := filepath.Join(folder.path, "ca.cer")
+	moveOld(*folder, "ca.cer")
+
+	err := writeRawX509Cert(certBytes, path)
+	if err != nil {
+		return "", err
+	}
+
+	return path, nil
+}
+
+func WritePemCaCertificate(certBytes []byte) (string, error) {
+
+	folder := getFolderByName("ca-cer")
+	path := filepath.Join(folder.path, "ca.cer")
+	moveOld(*folder, "ca.cer")
+
+	dest := filepath.Join(path)
+	if err := os.WriteFile(dest, certBytes, 0666); err != nil {
+		logger.Error("%v", err)
+		return "", err
+	}
+	return path, nil
+}
+
+func writeRawX509Cert(x509Bytes []byte, path string) error {
 
 	certPEM := pem.EncodeToMemory(&pem.Block{
 		Type:  "CERTIFICATE",
-		Bytes: certBytes,
+		Bytes: x509Bytes,
 	})
 
-	dest := filepath.Join(src.path, filename)
+	dest := filepath.Join(path)
 	if err := os.WriteFile(dest, certPEM, 0666); err != nil {
+		logger.Error("%v", err)
+		return err
+	}
+	return nil
+}
+
+func WriteRawRequest(csrBytes []byte, filename string) (string, error) {
+
+	csrPEM := pem.EncodeToMemory(&pem.Block{
+		Type:  "CERTIFICATE REQUEST",
+		Bytes: csrBytes,
+	})
+
+	filename = filename + ".csr"
+	folder := getFolderByName("ca-req")
+
+	dest := filepath.Join(folder.path, filename)
+	if err := os.WriteFile(dest, csrPEM, 0666); err != nil {
+		logger.Error("%v", err)
 		return "", err
 	}
 	return dest, nil
@@ -104,39 +159,17 @@ func WriteKeyNonce(nonce []byte) error {
 func ReadKeyNonce() ([]byte, error) {
 
 	src := getFolderByName("ca-key")
+	path := filepath.Join(src.path, "ca.key.nonce")
 
-	nonce, err := os.ReadFile(filepath.Join(src.path, "ca.key.nonce"))
-	if err != nil {
-		logger.Error("%v", err)
-		return nil, err
-	}
-
-	return nonce, nil
-}
-
-func ReadCaCertificate() ([]byte, error) {
-	src := getFolderByName("ca-issued")
-
-	cert, err := os.ReadFile(filepath.Join(src.path, "ca.cer"))
-	if err != nil {
-		logger.Error("%v", err)
-		return nil, err
-	}
-
-	return cert, nil
+	return readFile(path)
 }
 
 func ReadKey() ([]byte, error) {
 
 	src := getFolderByName("ca-key")
+	path := filepath.Join(src.path, "ca.key")
 
-	encryptedData, err := os.ReadFile(filepath.Join(src.path, "ca.key"))
-	if err != nil {
-		logger.Error("%v", err)
-		return nil, err
-	}
-
-	return encryptedData, nil
+	return readFile(path)
 }
 
 func GetLatestCRL() ([]byte, error) {
@@ -217,15 +250,48 @@ func WriteCRL(data []byte, id string) (string, error) {
 		return "", err
 	}
 	return path, nil
-
 }
 
-func GetRevokedCertificates() ([][]byte, error) {
-	targetFolder := getFolderByName("ca-revoked")
+func GetRevokedCertificates() ([]FileContentWithPath, error) {
+	src := getFolderByName("ca-revoked")
 
-	var filesData [][]byte
+	files, err := getFilesInFolder(src.path)
+	if err != nil {
+		logger.Error("%v", err)
+		return nil, err
+	}
+	if len(files) == 0 {
+		logger.Debug("No Revoked certificates found")
+		return nil, nil
+	}
+	return files, nil
+}
 
-	files, err := os.ReadDir(targetFolder.path)
+func ReadCaCertificate() ([]byte, error) {
+	src := getFolderByName("ca-cer")
+	path := filepath.Join(src.path, "ca.cer")
+
+	return readFile(path)
+}
+
+func GetIncommingSubCer() ([]FileContentWithPath, error) {
+	src := getFolderByName("cert-in")
+	files, err := getFilesInFolder(src.path)
+	if err != nil {
+		logger.Error("%v", err)
+		return nil, err
+	}
+	if len(files) == 0 {
+		logger.Debug("No new Sub ca certificate found to import")
+		return nil, nil
+	}
+	return files, nil
+}
+
+func getFilesInFolder(path string) ([]FileContentWithPath, error) {
+	var filePaths []FileContentWithPath
+
+	files, err := os.ReadDir(path)
 	if err != nil {
 		logger.Error("%v", err)
 		return nil, err
@@ -233,49 +299,49 @@ func GetRevokedCertificates() ([][]byte, error) {
 
 	for _, file := range files {
 		if !file.IsDir() {
-			data, err := os.ReadFile(filepath.Join(targetFolder.path, file.Name()))
+			filePath := filepath.Join(path, file.Name())
+			content, err := readFile(filePath)
 			if err != nil {
-				logger.Error("%v", err)
-				return nil, err
+				logger.Error("could not read %s: %v", filePath, err)
+				continue
 			}
+			current := FileContentWithPath{Name: file.Name(), Data: content, Path: filePath}
 
-			filesData = append(filesData, data)
+			filePaths = append(filePaths, current)
 		}
 	}
 
-	return filesData, nil
+	return filePaths, nil
 }
 
-type FileData struct {
+func readFile(path string) ([]byte, error) {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		logger.Error("%v", err)
+		return nil, err
+	}
+	return data, nil
+}
+
+type FileContentWithPath struct {
 	Name string
 	Data []byte
+	Path string
 }
 
-func GetCertificateRequests() ([]FileData, error) {
-	targetFolder := getFolderByName("requests")
+func GetCertificateRequests() ([]FileContentWithPath, error) {
+	src := getFolderByName("requests")
 
-	var filesData []FileData
-
-	files, err := os.ReadDir(targetFolder.path)
+	files, err := getFilesInFolder(src.path)
 	if err != nil {
 		logger.Error("%v", err)
 		return nil, err
 	}
-
-	for _, file := range files {
-		if !file.IsDir() {
-
-			data, err := os.ReadFile(filepath.Join(targetFolder.path, file.Name()))
-			if err != nil {
-				logger.Error("%v", err)
-				return nil, err
-			}
-
-			filesData = append(filesData, FileData{Name: file.Name(), Data: data})
-		}
+	if len(files) == 0 {
+		logger.Debug("No new certificate requests found to issue")
+		return nil, nil
 	}
-
-	return filesData, nil
+	return files, nil
 }
 
 func Publish(src string, destName string) error {
@@ -337,4 +403,12 @@ func moveOld(f folder, filename string) {
 	} else {
 		logger.Error("Unable to move file %s: %v", filename, err)
 	}
+}
+
+func Delete(path string) error {
+	err := os.Remove(path)
+	if err != nil {
+		logger.Error("%v", err)
+	}
+	return nil
 }

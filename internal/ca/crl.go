@@ -106,12 +106,6 @@ func generateCRL(number *big.Int) (string, error) {
 		AuthorityKeyId:      cert.SubjectKeyId,
 	}
 
-	// if CaCert.KeyUsage&x509.KeyUsageCRLSign == 0 {
-	// 	clog.WriteWarning(CaCert.Issuer.CommonName)
-	// 	fmt.Printf("var3: %v\n", CaCert)
-	// }
-
-	// clog.WriteInfo(keyUsageToString(CaCert.KeyUsage))
 	privkey := getPrivateKey()
 	crlBytes, err := x509.CreateRevocationList(rand.Reader, crlTemplate, &cert, &privkey)
 	if err != nil {
@@ -133,18 +127,16 @@ func generateCRL(number *big.Int) (string, error) {
 	return filename, nil
 }
 
-func convertCertificatesToCRL(certificates [][]byte) ([]pkix.RevokedCertificate, error) {
+func convertCertificatesToCRL(certificates []data.FileContentWithPath) ([]pkix.RevokedCertificate, error) {
 	result := []pkix.RevokedCertificate{}
 
-	for _, data := range certificates {
-		cert, err := x509.ParseCertificate(data)
-		if err != nil {
-			logger.Error("%v", err)
-			return nil, err
+	for _, cert := range certificates {
+		cert, err := parseCertificate(cert.Data)
+		if err != nil || len(cert.Raw) == 0 || cert.NotAfter.Before(time.Now()) {
+			continue
 		}
-
 		// ToDo: revocation date is wrong and I have to find a better solution like
-		// reading the old crl adn use the date from the old crl or store the revocation in fs
+		// reading the old crl and use the date from the old crl or store the revocation in fs
 		revokedCert := pkix.RevokedCertificate{
 			SerialNumber:   cert.SerialNumber,
 			RevocationTime: time.Now(),
