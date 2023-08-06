@@ -89,6 +89,7 @@ func VerifySubAuthority(pass []byte) {
 	}
 	if crl == nil {
 		logger.Info("No published crls found.")
+		PublishRevocationList()
 		return
 	}
 

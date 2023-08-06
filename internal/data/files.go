@@ -329,6 +329,17 @@ type FileContentWithPath struct {
 	Path string
 }
 
+func GetX509CertificateRequest(path string) ([]byte, error) {
+	raw, err := readFile(path)
+	if err != nil {
+		return nil, err
+	}
+
+	block, _ := pem.Decode(raw)
+	return block.Bytes, nil
+
+}
+
 func GetCertificateRequests() ([]FileContentWithPath, error) {
 	src := getFolderByName("requests")
 
@@ -378,8 +389,43 @@ func Publish(src string, destName string) error {
 	return nil
 }
 
+func Issued(src string) error {
+	destFolder := getFolderByName("issued")
+	fileName := filepath.Base(src)
+
+	moveOld(*destFolder, fileName)
+
+	srcFile, err := os.Open(src)
+	if err != nil {
+		logger.Error("%v", err)
+		return err
+	}
+	defer srcFile.Close()
+
+	dstFile, err := os.Create(filepath.Join(destFolder.path, fileName))
+	if err != nil {
+		logger.Error("%v", err)
+		return err
+	}
+	defer dstFile.Close()
+
+	_, err = io.Copy(dstFile, srcFile)
+	if err != nil {
+		logger.Error("%v", err)
+		return err
+	}
+
+	err = dstFile.Sync()
+	if err != nil {
+		logger.Error("%v", err)
+		return err
+	}
+	return nil
+}
+
 func ArchiveRequest(file string) {
-	srcFolder := getFolderByName("ca-publish")
+	srcFolder := getFolderByName("requests")
+	logger.Debug("Archiving request %s", file)
 	moveOld(*srcFolder, file)
 }
 

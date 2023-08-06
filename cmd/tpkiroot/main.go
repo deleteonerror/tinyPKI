@@ -35,7 +35,7 @@ func main() {
 			os.Exit(1)
 		}
 	}
-	err := ca.IssuePendingRequests()
+	err := ca.IssuePendingCaRequests()
 	if err != nil {
 		logger.Error("Issuance of pending request Failed: %v", err)
 	}

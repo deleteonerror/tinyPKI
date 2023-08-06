@@ -42,6 +42,7 @@ func addRequestOut() {
 	reqOut := []folder{
 		{"ca-req", filepath.Join(RootPath, "work", "carequest"), 0755, "out"},
 		{"cert-in", filepath.Join(RootPath, "work", "cacert"), 0755, "in"},
+		{"issued-old", filepath.Join(RootPath, "work", "certificates", ".old"), 0755, "out"},
 	}
 	folders = append(folders, reqOut...)
 }
