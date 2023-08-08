@@ -232,7 +232,7 @@ func getCaCertificate() x509.Certificate {
 	if len(caCert.SubjectKeyId) == 0 {
 		derCert, err := data.ReadCaCertificate()
 		if err != nil {
-			logger.Error("Cold not read Certificate file: %v", err)
+			logger.Debug("Cold not read Certificate file: %v", err)
 			return x509.Certificate{}
 		}
 		block, _ := pem.Decode(derCert)
