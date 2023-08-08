@@ -1,7 +1,8 @@
+include build/docker.Makefile
 
 export TINY_LOG=Debug
 
-build-all: build-root build-sub build-req
+build: build-root build-sub build-req
 
 build-root:
 	go build -o bin/tpkiroot -v cmd/tpkiroot/main.go 
