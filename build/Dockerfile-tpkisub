@@ -23,12 +23,12 @@ RUN addgroup -g 5000 -S tinyPKI && adduser -u 5500 -S tinyPKIsub -G tinyPKI
 # Create Data directory set 700 and chown
 RUN mkdir -p /var/lib/tinyPKI && \
     chmod 0700 /var/lib/tinyPKI && \
-    chown tinyPKIsub:tinyPKI /var/lib/tinyPKI
+    chown 5500:5000 /var/lib/tinyPKI
 
 # Create Public directory set 755 and chown
 RUN mkdir -p /var/tinyPKI && \
-    chmod 0755 /var/tinyPKI && \
-    chown tinyPKIsub:tinyPKI /var/tinyPKI
+    chmod 0775 /var/tinyPKI && \
+    chown 5500:5000 /var/tinyPKI
 
 COPY --from=builder /app/tpkisub /usr/local/sbin/
 

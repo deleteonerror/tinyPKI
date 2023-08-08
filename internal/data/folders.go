@@ -29,15 +29,15 @@ func initFolders() {
 		{"ca-revoked", filepath.Join(StorePath, "revoked"), 0700, "store"},          // The folder for revoked certificates
 		{"ca-issued", filepath.Join(StorePath, "issued"), 0700, "store"},            // The folder for issued certificates
 		{"ca-crl", filepath.Join(StorePath, "crl"), 0700, "store"},                  // The folder for issued certificates
-		{"requests", filepath.Join(WorkPath, "reqests"), 0755, "in"},                // The folder for incoming Certificate Requests
-		{"requests-old", filepath.Join(WorkPath, "reqests", ".old"), 0755, "in"},    // The folder for archived Certificate Requests
-		{"issued", filepath.Join(WorkPath, "certificates"), 0755, "out"},            // Out folder for issued certificates including chains
-		{"revoke", filepath.Join(WorkPath, "revoke"), 0755, "in"},                   // In folder for certificates which should be revoked
-		{"ca-publish", filepath.Join(WorkPath, "publish"), 0755, "out"},             // Out folder which contains ca certs and crl's for publishing to aia and cdp
-		{"ca-publish-old", filepath.Join(WorkPath, "publish", ".old"), 0755, "out"}, // Out folder which contains archived ca certs and crl's
-		{"ca-req", filepath.Join(WorkPath, "reqests", "ca"), 0755, "out"},
-		{"ca-cert-in", filepath.Join(WorkPath, "certificates", "ca"), 0755, "in"},
-		{"issued-old", filepath.Join(WorkPath, "certificates", ".old"), 0755, "out"},
+		{"requests", filepath.Join(WorkPath, "reqests"), 0775, "in"},                // The folder for incoming Certificate Requests
+		{"requests-old", filepath.Join(WorkPath, "reqests", ".old"), 0775, "in"},    // The folder for archived Certificate Requests
+		{"issued", filepath.Join(WorkPath, "certificates"), 0775, "out"},            // Out folder for issued certificates including chains
+		{"revoke", filepath.Join(WorkPath, "revoke"), 0775, "in"},                   // In folder for certificates which should be revoked
+		{"ca-publish", filepath.Join(WorkPath, "publish"), 0775, "out"},             // Out folder which contains ca certs and crl's for publishing to aia and cdp
+		{"ca-publish-old", filepath.Join(WorkPath, "publish", ".old"), 0775, "out"}, // Out folder which contains archived ca certs and crl's
+		{"ca-req", filepath.Join(WorkPath, "reqests", "ca"), 0775, "out"},
+		{"ca-cert-in", filepath.Join(WorkPath, "certificates", "ca"), 0775, "in"},
+		{"issued-old", filepath.Join(WorkPath, "certificates", ".old"), 0775, "out"},
 	}
 }
 
