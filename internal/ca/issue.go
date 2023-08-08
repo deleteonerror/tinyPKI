@@ -192,7 +192,7 @@ func createIntermediateCertificate(csr *x509.CertificateRequest) error {
 		return err
 	}
 
-	file, err := data.WriteRawIssuedCertificate(certBytes, cert.Subject.CommonName+"_"+hex.EncodeToString(ski[:]))
+	file, err := data.WriteRawIssuedCertificate(certBytes, csr.Subject.CommonName+"_"+hex.EncodeToString(ski[:]))
 	if err != nil {
 		logger.Error("%v", err)
 		return err
