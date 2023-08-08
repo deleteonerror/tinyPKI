@@ -35,16 +35,10 @@ func initFolders() {
 		{"revoke", filepath.Join(WorkPath, "revoke"), 0755, "in"},                   // In folder for certificates which should be revoked
 		{"ca-publish", filepath.Join(WorkPath, "publish"), 0755, "out"},             // Out folder which contains ca certs and crl's for publishing to aia and cdp
 		{"ca-publish-old", filepath.Join(WorkPath, "publish", ".old"), 0755, "out"}, // Out folder which contains archived ca certs and crl's
-	}
-}
-
-func addRequestOut() {
-	reqOut := []folder{
-		{"ca-req", filepath.Join(WorkPath, "carequest"), 0755, "out"},
-		{"cert-in", filepath.Join(WorkPath, "cacert"), 0755, "in"},
+		{"ca-req", filepath.Join(WorkPath, "reqests", "ca"), 0755, "out"},
+		{"ca-cert-in", filepath.Join(WorkPath, "certificates", "ca"), 0755, "in"},
 		{"issued-old", filepath.Join(WorkPath, "certificates", ".old"), 0755, "out"},
 	}
-	folders = append(folders, reqOut...)
 }
 
 func SetupFolders() {

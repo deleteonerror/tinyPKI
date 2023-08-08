@@ -13,7 +13,7 @@ import (
 func init() {
 	log.SetFlags(log.LstdFlags)
 	log.SetFlags(log.Flags() &^ (log.Lshortfile | log.Llongfile))
-	data.Initialize(true)
+	data.Initialize()
 }
 
 func main() {
@@ -23,7 +23,7 @@ func main() {
 		pass := terminal.AskPassphrase()
 		ca.VerifySubAuthority(pass)
 	} else {
-		config, err := data.ReadSetupConfiguration()
+		config, err := data.ReadSubSetupConfiguration()
 		if err != nil {
 			logger.Warning("Configuration not found.")
 			config = terminal.GetSubConfigInteractive()

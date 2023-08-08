@@ -15,7 +15,7 @@ import (
 )
 
 func IssuePendingCaRequests() error {
-	requests, err := data.GetCertificateRequests()
+	requests, err := data.GetCaCertificateRequests()
 	if err != nil {
 		logger.Error("%v", err)
 		return err
@@ -192,7 +192,7 @@ func createIntermediateCertificate(csr *x509.CertificateRequest) error {
 		return err
 	}
 
-	file, err := data.WriteRawIssuedCertificate(certBytes, csr.Subject.CommonName+"_"+hex.EncodeToString(ski[:]))
+	file, err := data.WriteRawIssuedCaCertificate(certBytes, csr.Subject.CommonName+"_"+hex.EncodeToString(ski[:]))
 	if err != nil {
 		logger.Error("%v", err)
 		return err

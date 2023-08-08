@@ -11,7 +11,7 @@ import (
 var StorePath string
 var WorkPath string
 
-func Initialize(addReqOut bool) {
+func Initialize() {
 
 	container, exists := os.LookupEnv("CONTAINER")
 	if exists && strings.EqualFold(container, "true") {
@@ -53,9 +53,4 @@ func Initialize(addReqOut bool) {
 	logger.Info("loglevel is %d", logger.LogSeverity)
 
 	initFolders()
-
-	if addReqOut {
-		addRequestOut()
-	}
-
 }

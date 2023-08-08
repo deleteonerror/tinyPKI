@@ -37,7 +37,7 @@ func getKeyUsage(csr x509.CertificateRequest) (x509.KeyUsage, error) {
 			var ku asn1.BitString
 			_, err := asn1.Unmarshal(ext.Value, &ku)
 			if err != nil {
-				logger.Error("Error unmarshaling:", err)
+				logger.Error("Error unmarshaling: %v", err)
 				return x509.KeyUsageDigitalSignature, errors.New("no keyusage found")
 			}
 

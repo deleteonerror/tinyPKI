@@ -15,9 +15,25 @@ import (
 	"deleteonerror.com/tyinypki/internal/model"
 )
 
-func ReadSetupConfiguration() (model.SetupConfig, error) {
+func ReadRootSetupConfiguration() (model.SetupConfig, error) {
 
-	file, err := os.Open(filepath.Join(WorkPath, "config.json"))
+	file, err := os.Open(filepath.Join(WorkPath, "root.config.json"))
+	if err != nil {
+		return model.SetupConfig{}, err
+	}
+	defer file.Close()
+
+	var config model.SetupConfig
+	decoder := json.NewDecoder(file)
+	if err := decoder.Decode(&config); err != nil {
+		return model.SetupConfig{}, err
+	}
+
+	return config, nil
+}
+func ReadSubSetupConfiguration() (model.SetupConfig, error) {
+
+	file, err := os.Open(filepath.Join(WorkPath, "sub.config.json"))
 	if err != nil {
 		return model.SetupConfig{}, err
 	}
@@ -35,6 +51,19 @@ func ReadSetupConfiguration() (model.SetupConfig, error) {
 func WriteRawIssuedCertificate(certBytes []byte, filename string) (string, error) {
 
 	folder := getFolderByName("ca-issued")
+	path := filepath.Join(folder.path, filename+".cer")
+
+	err := writeRawX509Cert(certBytes, path)
+	if err != nil {
+		return "", err
+	}
+
+	return path, nil
+}
+
+func WriteRawIssuedCaCertificate(certBytes []byte, filename string) (string, error) {
+
+	folder := getFolderByName("ca-cert-in")
 	path := filepath.Join(folder.path, filename+".cer")
 
 	err := writeRawX509Cert(certBytes, path)
@@ -275,7 +304,7 @@ func ReadCaCertificate() ([]byte, error) {
 }
 
 func GetIncommingSubCer() ([]FileContentWithPath, error) {
-	src := getFolderByName("cert-in")
+	src := getFolderByName("ca-cert-in")
 	files, err := getFilesInFolder(src.path)
 	if err != nil {
 		logger.Error("%v", err)
@@ -338,6 +367,21 @@ func GetX509CertificateRequest(path string) ([]byte, error) {
 	block, _ := pem.Decode(raw)
 	return block.Bytes, nil
 
+}
+
+func GetCaCertificateRequests() ([]FileContentWithPath, error) {
+	src := getFolderByName("ca-req")
+
+	files, err := getFilesInFolder(src.path)
+	if err != nil {
+		logger.Error("%v", err)
+		return nil, err
+	}
+	if len(files) == 0 {
+		logger.Debug("No new ca certificate requests found to issue")
+		return nil, nil
+	}
+	return files, nil
 }
 
 func GetCertificateRequests() ([]FileContentWithPath, error) {

@@ -28,7 +28,7 @@ func SetupSubAuthority(conf model.SetupConfig, pass []byte) error {
 		return err
 	}
 
-	caIn := data.GetPathByName("cert-in")
+	caIn := data.GetPathByName("ca-cert-in")
 	logger.Info("IMPORTANT: Request create at %s. Place the Issued certificate in %s", reqFile, caIn)
 	return nil
 }
@@ -37,7 +37,6 @@ func VerifySubAuthority(pass []byte) {
 	PassPhrase = pass
 
 	key := getPrivateKey()
-
 	cert := getCaCertificate()
 
 	if len(cert.Raw) == 0 {
