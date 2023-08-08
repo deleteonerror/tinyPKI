@@ -1,0 +1,39 @@
+services:
+  tinyroot:
+    image: deleteonerror/tinypki_root:v0.0.6-alpha
+    container_name: tiny-pki-root
+    network_mode: "none"
+    volumes:
+      - root-store:/var/lib/tinyPKI:rw
+      # Important: do not use a named volume and use the same directory as on the Sub CA
+      - ./local/work:/var/tinyPKI:rw
+    environment:
+      - TINY_LOG=DEBUG
+    configs:
+      - source: root-config
+        target: /var/tinyPKI/root.config.json
+
+  tinysub:
+    image: deleteonerror/tinypki_sub:v0.0.6-alpha
+    container_name: tiny-pki-sub
+    network_mode: "none"
+    volumes:
+      - sub-store:/var/lib/tinyPKI:rw
+      # Important: do not use a named volume and use the same directory as on the Root CA
+      - ./local/work:/var/tinyPKI:rw
+    environment:
+      - TINY_LOG=DEBUG
+    configs:
+      - source: sub-config
+        target: /var/tinyPKI/sub.config.json
+
+volumes:
+  pki-work:
+  root-store:
+  sub-store:
+
+configs:
+  root-config:
+    file: ../configs/tinypki.root.example.json
+  sub-config:
+    file: ../configs/tinypki.sub.example.json
