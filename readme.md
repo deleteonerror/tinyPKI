@@ -30,6 +30,7 @@ only `golang.org/x` modules are used
 
 ## maybe feature
 
+- decoding ASN.1 of csr's
 - file system watcher for the sub ca `fsnotify`
 - passphrase file
 - docker image
@@ -44,4 +45,6 @@ only `golang.org/x` modules are used
 - CA renewal with new name
 - CA renewal with same key
 - Root private key export
+- Server Generated keys other than CA keys
+- Key recovery
 - RSA support
