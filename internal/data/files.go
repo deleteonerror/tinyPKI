@@ -17,7 +17,7 @@ import (
 
 func ReadSetupConfiguration() (model.SetupConfig, error) {
 
-	file, err := os.Open(filepath.Join(RootPath, "config.json"))
+	file, err := os.Open(filepath.Join(WorkPath, "config.json"))
 	if err != nil {
 		return model.SetupConfig{}, err
 	}

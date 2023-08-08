@@ -12,18 +12,19 @@ build-req:
 	go build -o bin/tpkireq -v cmd/tpkireq/main.go 
 
 config-sub:
-	mkdir -p $(CURDIR)/bin/sub_data
-	cp configs/tinypki.sub.example.json $(CURDIR)/bin/sub_data/config.json
+	mkdir -p $(CURDIR)/bin/sub_data/work
+	cp configs/tinypki.sub.example.json $(CURDIR)/bin/sub_data/work/config.json
 
 config-root:
-	mkdir -p $(CURDIR)/bin/root_data
-	cp configs/tinypki.root.example.json $(CURDIR)/bin/root_data/config.json
+	mkdir -p $(CURDIR)/bin/root_data/work
+	cp configs/tinypki.root.example.json $(CURDIR)/bin/root_data/work/config.json
 
 run-root: build-root config-root
 	export TINY_ROOT_PATH=$(CURDIR)/bin/root_data; \
 	./bin/tpkiroot
 
 rerun-root:
+	export TINY_ROOT_PATH=$(CURDIR)/bin/root_data; \
 	./bin/tpkiroot
 
 run-sub: build-sub config-sub
@@ -31,6 +32,7 @@ run-sub: build-sub config-sub
 	./bin/tpkisub
 
 rerun-sub:
+	export TINY_ROOT_PATH=$(CURDIR)/bin/sub_data; \
 	 ./bin/tpkisub
 
 run-req: build-req
@@ -49,5 +51,3 @@ deps:
 
 test: 
 	go test -v ./...
-
-

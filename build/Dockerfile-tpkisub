@@ -36,4 +36,6 @@ RUN chmod +x /usr/local/sbin/tpkisub
 
 USER tinyPKI
 
+ENV CONTAINER true
+
 ENTRYPOINT ["/bin/sh","-c","sleep infinity"]

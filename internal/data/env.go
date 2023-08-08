@@ -2,26 +2,36 @@ package data
 
 import (
 	"os"
+	"path/filepath"
 	"strings"
 
 	"deleteonerror.com/tyinypki/internal/logger"
 )
 
-var RootPath string
+var StorePath string
+var WorkPath string
 
 func Initialize(addReqOut bool) {
 
-	rootPath, exists := os.LookupEnv("TINY_ROOT_PATH")
+	container, exists := os.LookupEnv("CONTAINER")
+	if exists && strings.EqualFold(container, "true") {
+		StorePath = "/var/lib/tinyPKI"
+		WorkPath = "/var/tinyPKI"
+	}
 
+	rootPath, exists := os.LookupEnv("TINY_ROOT_PATH")
 	if !exists {
-		RootPath = getAppPath()
+		rootPath = getAppPath()
+		WorkPath = filepath.Join(rootPath, "work")
+		StorePath = filepath.Join(rootPath, "store")
 	} else {
 		_, err := os.Stat(rootPath)
 		if os.IsNotExist(err) {
 			logger.Warning("Environment variable `TINY_ROOT_PATH` set to `%s`, directory not accesible, fallback to default", rootPath)
-			RootPath = getAppPath()
+			rootPath = getAppPath()
 		}
-		RootPath = rootPath
+		WorkPath = filepath.Join(rootPath, "work")
+		StorePath = filepath.Join(rootPath, "store")
 	}
 
 	severity, exists := os.LookupEnv("TINY_LOG")
