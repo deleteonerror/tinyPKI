@@ -13,18 +13,19 @@ var WorkPath string
 
 func Initialize() {
 
-	container, exists := os.LookupEnv("CONTAINER")
-	if exists && strings.EqualFold(container, "true") {
+	container, hasContainerVar := os.LookupEnv("CONTAINER")
+	if hasContainerVar && strings.EqualFold(container, "true") {
+		logger.Debug("Using container path")
 		StorePath = "/var/lib/tinyPKI"
 		WorkPath = "/var/tinyPKI"
 	}
 
 	rootPath, exists := os.LookupEnv("TINY_ROOT_PATH")
-	if !exists {
+	if !exists && !hasContainerVar {
 		rootPath = getAppPath()
 		WorkPath = filepath.Join(rootPath, "work")
 		StorePath = filepath.Join(rootPath, "store")
-	} else {
+	} else if exists {
 		_, err := os.Stat(rootPath)
 		if os.IsNotExist(err) {
 			logger.Warning("Environment variable `TINY_ROOT_PATH` set to `%s`, directory not accesible, fallback to default", rootPath)
