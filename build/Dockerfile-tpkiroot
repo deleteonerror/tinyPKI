@@ -1,0 +1,44 @@
+FROM --platform=$BUILDPLATFORM golang:latest as builder
+
+ARG TARGETPLATFORM
+ARG BUILDPLATFORM
+
+WORKDIR /app
+
+COPY ../go.mod ../go.sum ./
+
+RUN go mod download 
+
+COPY ../. .
+
+RUN export GOOS=$(echo ${TARGETPLATFORM} | cut -d / -f1) && \
+    export GOARCH=$(echo ${TARGETPLATFORM} | cut -d / -f2) && \
+    GOARM=$(echo ${TARGETPLATFORM} | cut -d / -f3 | cut -c2-) && \
+    CGO_ENABLED=0 go build -a -installsuffix cgo -o tpkiroot ./cmd/tpkiroot/main.go
+
+FROM --platform=$TARGETPLATFORM alpine:latest  
+
+RUN addgroup -S tinyPKI && adduser -S tinyPKI -G tinyPKI
+
+# Create Data directory set 700 and chown
+RUN mkdir -p /var/lib/tinyPKI && \
+    chmod 0700 /var/lib/tinyPKI && \
+    chown tinyPKI:tinyPKI /var/lib/tinyPKI
+
+# Create Public directory set 755 and chown
+RUN mkdir -p /var/tinyPKI && \
+    chmod 0755 /var/tinyPKI && \
+    chown tinyPKI:tinyPKI /var/tinyPKI
+
+COPY --from=builder /app/tpkiroot /usr/local/sbin/
+
+RUN chmod +x /usr/local/sbin/tpkiroot
+
+USER tinyPKI
+
+ENTRYPOINT ["/bin/sh","-c","sleep infinity"]
+
+
+
+
+
