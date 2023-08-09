@@ -6,7 +6,7 @@ services:
     volumes:
       - root-store:/var/lib/tinyPKI:rw
       # Important: do not use a named volume and use the same directory as on the Sub CA
-      - ./local/work:/var/tinyPKI:rw
+      - ../.local/work:/var/tinyPKI:rw
     environment:
       - TINY_LOG=DEBUG
     configs:
@@ -20,7 +20,7 @@ services:
     volumes:
       - sub-store:/var/lib/tinyPKI:rw
       # Important: do not use a named volume and use the same directory as on the Root CA
-      - ./local/work:/var/tinyPKI:rw
+      - ../.local/work:/var/tinyPKI:rw
     environment:
       - TINY_LOG=DEBUG
     configs:

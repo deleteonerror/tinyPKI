@@ -5,14 +5,6 @@ A tiny PKI for Home, Lab and Dev usage.
 - setup documentation [here](./docs/setup.md)
 - usage documentation [here](./docs/usage.md)
 
-## Validity periods
-
-| type | Cert | CRL |
-|:---| --- | --- |
-| Root | 12 years | 120 days |
-| Sub | 6 years | 90 days |
-| EE | 1 year | :x: |
-
 ## security considerations
 
 The private key of the Certificate Authority
