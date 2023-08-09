@@ -8,10 +8,8 @@ import (
 	"deleteonerror.com/tyinypki/internal/logger"
 )
 
-var caCert x509.Certificate
-
 func getCaCertificate() x509.Certificate {
-	if len(caCert.SubjectKeyId) == 0 {
+	if len(cfg.Certificate.Raw) == 0 {
 		derCert, err := data.ReadCaCertificate()
 		if err != nil {
 			logger.Debug("Cold not read Certificate file: %v", err)
@@ -24,10 +22,10 @@ func getCaCertificate() x509.Certificate {
 			logger.Error("Cold not pars Certificate file: %v", err)
 		}
 		logger.Debug("Certificate loaded.")
-		caCert = *pCaCert
+		cfg.Certificate = *pCaCert
 
 	}
-	return caCert
+	return cfg.Certificate
 }
 
 func parseCertificate(raw []byte) (x509.Certificate, error) {

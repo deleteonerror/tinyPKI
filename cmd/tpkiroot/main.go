@@ -22,7 +22,7 @@ func main() {
 		pass := terminal.AskPassphrase()
 		ca.VerifyAuthority(pass)
 	} else {
-		config, err := data.ReadRootSetupConfiguration()
+		config, err := data.ReadSetupConfiguration(true)
 		if err != nil {
 			logger.Warning("Configuration not found.")
 			config = terminal.GetRootConfigInteractive()

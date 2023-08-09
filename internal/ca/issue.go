@@ -86,13 +86,6 @@ func IssuePendingRequests() error {
 
 func createCertificate(csr *x509.CertificateRequest) error {
 
-	serialNumberLimit := new(big.Int).Lsh(big.NewInt(1), 128)
-	serialNumber, err := rand.Int(rand.Reader, serialNumberLimit)
-	if err != nil {
-		logger.Error("%v", err)
-		return err
-	}
-
 	publicKey, err := x509.MarshalPKIXPublicKey(csr.PublicKey)
 	if err != nil {
 		logger.Error("%v", err)
@@ -110,8 +103,23 @@ func createCertificate(csr *x509.CertificateRequest) error {
 		logger.Error("No EKU in Request! Extended Key usage not set.")
 	}
 
+	cdp, err := url.JoinPath(cfg.Config.BaseUrl, url.PathEscape(cfg.Config.Name+".crl"))
+	if err != nil {
+		logger.Error("%v", err)
+		return err
+	}
+
+	aia, err := url.JoinPath(cfg.Config.BaseUrl, url.PathEscape(cfg.Config.Name+".cer"))
+	if err != nil {
+		logger.Error("%v", err)
+		return err
+	}
+	srl := cfg.Config.LastIssuedSerial
+
+	srl.Add(srl, big.NewInt(1))
+
 	template := &x509.Certificate{
-		SerialNumber:          serialNumber,
+		SerialNumber:          srl,
 		Subject:               csr.Subject,
 		NotBefore:             time.Now(),
 		NotAfter:              time.Now().AddDate(1, 0, 0),
@@ -119,12 +127,15 @@ func createCertificate(csr *x509.CertificateRequest) error {
 		BasicConstraintsValid: false,
 		MaxPathLen:            0,
 		SubjectKeyId:          ski[:],
+		AuthorityKeyId:        cfg.Certificate.SubjectKeyId,
 		DNSNames:              csr.DNSNames,
 		EmailAddresses:        csr.EmailAddresses,
 		IPAddresses:           csr.IPAddresses,
 		URIs:                  csr.URIs,
 		KeyUsage:              ku,
 		ExtKeyUsage:           eku,
+		IssuingCertificateURL: []string{aia},
+		CRLDistributionPoints: []string{cdp},
 	}
 
 	cert := getCaCertificate()
@@ -142,6 +153,7 @@ func createCertificate(csr *x509.CertificateRequest) error {
 		return err
 	}
 
+	updateLastSerial(srl)
 	data.Issued(file)
 
 	return nil
@@ -149,28 +161,31 @@ func createCertificate(csr *x509.CertificateRequest) error {
 
 func createIntermediateCertificate(csr *x509.CertificateRequest) error {
 
-	serialNumberLimit := new(big.Int).Lsh(big.NewInt(1), 128)
-	serialNumber, err := rand.Int(rand.Reader, serialNumberLimit)
-	if err != nil {
-		logger.Error("%v", err)
-		return err
-	}
-
 	publicKey, err := x509.MarshalPKIXPublicKey(csr.PublicKey)
 	if err != nil {
 		logger.Error("%v", err)
 		return err
 	}
 	ski := sha256.Sum256(publicKey)
-	// todo get baseurl
-	cdp, err := url.JoinPath("", url.PathEscape(csr.Subject.CommonName+".crl"))
+
+	cdp, err := url.JoinPath(cfg.Config.BaseUrl, url.PathEscape(cfg.Config.Name+".crl"))
 	if err != nil {
 		logger.Error("%v", err)
 		return err
 	}
 
+	aia, err := url.JoinPath(cfg.Config.BaseUrl, url.PathEscape(cfg.Config.Name+".cer"))
+	if err != nil {
+		logger.Error("%v", err)
+		return err
+	}
+	srl := cfg.Config.LastIssuedSerial
+
+	logger.Debug("srl is %d\n", srl)
+	srl.Add(srl, big.NewInt(1))
+
 	template := &x509.Certificate{
-		SerialNumber:          serialNumber,
+		SerialNumber:          srl,
 		Subject:               csr.Subject,
 		NotBefore:             time.Now(),
 		NotAfter:              time.Now().AddDate(6, 0, 0),
@@ -180,6 +195,8 @@ func createIntermediateCertificate(csr *x509.CertificateRequest) error {
 		MaxPathLen:            0,
 		MaxPathLenZero:        true,
 		SubjectKeyId:          ski[:],
+		AuthorityKeyId:        cfg.Certificate.SubjectKeyId,
+		IssuingCertificateURL: []string{aia},
 		CRLDistributionPoints: []string{cdp},
 	}
 
@@ -198,6 +215,7 @@ func createIntermediateCertificate(csr *x509.CertificateRequest) error {
 		return err
 	}
 
+	updateLastSerial(srl)
 	data.Publish(file, csr.Subject.CommonName+".cer")
 
 	return nil

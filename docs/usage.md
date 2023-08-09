@@ -6,6 +6,7 @@
   - [Validity Periods](#validity-periods)
 - [Submitting a Certificate Request](#submitting-a-certificate-request)
 - [Submitting a CA Certificate Request](#submitting-a-ca-certificate-request)
+- [Revoke a Certificate](#revoke-a-certificate)
 
 ## Defaults
 
@@ -32,7 +33,6 @@ All keys are generated using *ECDSA 384* and are stored encrypted with *chacha20
 | Sub | 6 years | 90 days |
 | EE | 1 year | :x: |
 
-
 ## Submitting a Certificate Request
 
 Submitting a certificate request is a straightforward process:
@@ -52,3 +52,14 @@ Submitting a Sub CA certificate request is a straightforward process:
 3. Execute the following command: `docker exec -it <id of your tiny_pki_ROOT container> sh -c tpkiroot`.
 4. Enter your passphrase of the Root CA when prompted. If there are any errors, they will be displayed in the command line.
 5. If no errors occur, your certificate will be issued, and you can find it at `/var/tinyPKI/certificates/ca`.
+
+## Revoke a Certificate
+
+Revoking a certificate:
+
+1. Place the certificate you want to remove in the `/var/tinyPKI/revoke` directory.
+2. Retrieve the container ID of your *tiny_pki_sub* instance.
+3. Execute the following command: `docker exec -it <id of your tiny_pki_sub container> sh -c tpkisub`.
+4. Enter your passphrase of the CA when prompted. If there are any errors, they will be displayed in the command line.
+5. If no errors occur, your certificate will be revoked, and you can find a new CRL at `/var/tinyPKI/publish`.
+6. Copy the \*.crl to your web server.

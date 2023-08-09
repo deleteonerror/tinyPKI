@@ -156,6 +156,4 @@ this will open a shell inside the container. Make sure you chose a save and secu
 
 ## Finalize
 
-What happened until now?
-
-- with the initialization of the *sub ca* there was a Private key for the sub created and a certificate signing request for 
+All what's left is copy the content of the publish folder `/var/tinyPKI/publish` (\*.crl,\*.cer) to the web server, serving your *base_url* and start issuing certificates.

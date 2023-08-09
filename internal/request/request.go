@@ -10,7 +10,7 @@ import (
 	"deleteonerror.com/tyinypki/internal/model"
 )
 
-func CreateSubCaRequest(conf model.SetupConfig, key ecdsa.PrivateKey) []byte {
+func CreateSubCaRequest(conf model.Config, key ecdsa.PrivateKey) []byte {
 
 	subject := pkix.Name{
 		Organization:       []string{conf.Organization},

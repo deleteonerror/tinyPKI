@@ -25,10 +25,8 @@ func arePublicKeysEqual(key1, key2 *ecdsa.PublicKey) bool {
 		key1.Y.Cmp(key2.Y) == 0
 }
 
-var pKey ecdsa.PrivateKey
-
 func getPrivateKey() ecdsa.PrivateKey {
-	if pKey.D == nil {
+	if cfg.PrivateKey.D == nil {
 		raw, err := getRawPrivateKey(PassPhrase)
 		if err != nil {
 			logger.Error("Cold not read Private Key, wrong passphrase or corupted key file.")
@@ -39,11 +37,11 @@ func getPrivateKey() ecdsa.PrivateKey {
 			logger.Error("Cold not parse Private Key file: %v", err)
 			os.Exit(1)
 		}
-		pKey = *key
+		cfg.PrivateKey = *key
 		logger.Debug("Private Key loaded.")
 	}
 
-	return pKey
+	return cfg.PrivateKey
 }
 
 func getRawPrivateKey(pass []byte) ([]byte, error) {

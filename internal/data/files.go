@@ -1,7 +1,6 @@
 package data
 
 import (
-	"encoding/json"
 	"encoding/pem"
 	"io"
 	"io/fs"
@@ -14,39 +13,6 @@ import (
 	"deleteonerror.com/tyinypki/internal/logger"
 	"deleteonerror.com/tyinypki/internal/model"
 )
-
-func ReadRootSetupConfiguration() (model.SetupConfig, error) {
-
-	file, err := os.Open(filepath.Join(WorkPath, "root.config.json"))
-	if err != nil {
-		return model.SetupConfig{}, err
-	}
-	defer file.Close()
-
-	var config model.SetupConfig
-	decoder := json.NewDecoder(file)
-	if err := decoder.Decode(&config); err != nil {
-		return model.SetupConfig{}, err
-	}
-
-	return config, nil
-}
-func ReadSubSetupConfiguration() (model.SetupConfig, error) {
-
-	file, err := os.Open(filepath.Join(WorkPath, "sub.config.json"))
-	if err != nil {
-		return model.SetupConfig{}, err
-	}
-	defer file.Close()
-
-	var config model.SetupConfig
-	decoder := json.NewDecoder(file)
-	if err := decoder.Decode(&config); err != nil {
-		return model.SetupConfig{}, err
-	}
-
-	return config, nil
-}
 
 func WriteRawIssuedCertificate(certBytes []byte, filename string) (string, error) {
 
@@ -296,6 +262,47 @@ func GetRevokedCertificatesFromCaStore() ([]model.FileContentWithPath, error) {
 	return files, nil
 }
 
+func GetNewRevokations() ([]model.FileContentWithPath, error) {
+	src := getFolderByName("revoke")
+
+	files, err := getFilesInFolder(src.path)
+	if err != nil {
+		logger.Error("%v", err)
+		return nil, err
+	}
+	if len(files) == 0 {
+		logger.Debug("No Revoked certificates found")
+		return nil, nil
+	}
+	return files, nil
+}
+
+func ImportRevokedCertificate(in model.FileContentWithPath) error {
+
+	src := in.Path
+	destDir := getFolderByName("ca-revoked")
+
+	_, err := os.Stat(src)
+	if err == nil {
+		// file exists so we move them
+		prefix := time.Now().Format("2006-01-02_15-04-05_")
+		targetPath := filepath.Join(destDir.path, prefix+in.Name)
+
+		if err := os.Rename(src, targetPath); err != nil {
+			logger.Error("Failed to move file %v", err)
+		} else {
+			logger.Debug("Moved file to %s", targetPath)
+		}
+	} else if os.IsNotExist(err) {
+		return err
+	} else {
+		logger.Error("Unable to move file %s: %v", in.Name, err)
+		return err
+	}
+	return nil
+
+}
+
 func ReadCaCertificate() ([]byte, error) {
 	src := getFolderByName("ca-cer")
 	path := filepath.Join(src.path, "ca.cer")
@@ -315,41 +322,6 @@ func GetIncommingSubCer() ([]model.FileContentWithPath, error) {
 		return nil, nil
 	}
 	return files, nil
-}
-
-func getFilesInFolder(path string) ([]model.FileContentWithPath, error) {
-	var filePaths []model.FileContentWithPath
-
-	files, err := os.ReadDir(path)
-	if err != nil {
-		logger.Error("%v", err)
-		return nil, err
-	}
-
-	for _, file := range files {
-		if !file.IsDir() {
-			filePath := filepath.Join(path, file.Name())
-			content, err := readFile(filePath)
-			if err != nil {
-				logger.Error("could not read %s: %v", filePath, err)
-				continue
-			}
-			current := model.FileContentWithPath{Name: file.Name(), Data: content, Path: filePath}
-
-			filePaths = append(filePaths, current)
-		}
-	}
-
-	return filePaths, nil
-}
-
-func readFile(path string) ([]byte, error) {
-	data, err := os.ReadFile(path)
-	if err != nil {
-		logger.Error("%v", err)
-		return nil, err
-	}
-	return data, nil
 }
 
 func GetX509CertificateRequest(path string) ([]byte, error) {
@@ -465,28 +437,6 @@ func ArchiveRequest(file string) {
 	srcFolder := getFolderByName("requests")
 	logger.Debug("Archiving request %s", file)
 	moveOld(*srcFolder, file)
-}
-
-func moveOld(f folder, filename string) {
-	src := filepath.Join(f.path, filename)
-	desFolder := getFolderByName(f.name + "-old")
-
-	_, err := os.Stat(src)
-	if err == nil {
-		// file exists so we move them
-		prefix := time.Now().Format("2006-01-02_15-04-05_")
-		targetPath := filepath.Join(desFolder.path, prefix+filename)
-
-		if err := os.Rename(src, targetPath); err != nil {
-			logger.Error("Failed to move file %v", err)
-		} else {
-			logger.Debug("Moved file to %s", targetPath)
-		}
-	} else if os.IsNotExist(err) {
-		return
-	} else {
-		logger.Error("Unable to move file %s: %v", filename, err)
-	}
 }
 
 func Delete(path string) error {

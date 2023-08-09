@@ -23,7 +23,7 @@ func main() {
 		pass := terminal.AskPassphrase()
 		ca.VerifySubAuthority(pass)
 	} else {
-		config, err := data.ReadSubSetupConfiguration()
+		config, err := data.ReadSetupConfiguration(false)
 		if err != nil {
 			logger.Warning("Configuration not found.")
 			config = terminal.GetSubConfigInteractive()

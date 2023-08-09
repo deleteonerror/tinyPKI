@@ -22,6 +22,8 @@ func VerifyAuthority(pass []byte) {
 	PassPhrase = pass
 
 	getPrivateKey()
+	canf := getConfiguration()
+	logger.Debug("%v\n", canf)
 
 	cert := getCaCertificate()
 	if len(cert.Raw) == 0 {
@@ -48,10 +50,14 @@ func VerifyAuthority(pass []byte) {
 	} else {
 		logger.Info("last published crl ist valid.")
 	}
+
+	RevokeCertificates()
 }
 
-func SetupAuthority(conf model.SetupConfig, pass []byte) error {
+func SetupAuthority(initConfig model.Config, pass []byte) error {
 	PassPhrase = pass
+
+	updateConfiguration(initConfig)
 
 	privateKey, err := createPrivateKey(pass)
 	if err != nil {
@@ -66,31 +72,34 @@ func SetupAuthority(conf model.SetupConfig, pass []byte) error {
 	}
 	ski := sha256.Sum256(publicKey)
 
-	cdp, err := url.JoinPath(conf.BaseUrl, url.PathEscape(conf.Name+".crl"))
-	if err != nil {
-		logger.Error("%v", err)
-		return err
-	}
-	aia, err := url.JoinPath(conf.BaseUrl, url.PathEscape(conf.Name+".cer"))
+	srl := cfg.Config.LastIssuedSerial
+	srl.Add(srl, big.NewInt(1))
+
+	cdp, err := url.JoinPath(cfg.Config.BaseUrl, url.PathEscape(cfg.Config.Name+".crl"))
 	if err != nil {
 		logger.Error("%v", err)
 		return err
 	}
 
-	// ToDo: Serial Number is not in rnd
+	aia, err := url.JoinPath(cfg.Config.BaseUrl, url.PathEscape(cfg.Config.Name+".cer"))
+	if err != nil {
+		logger.Error("%v", err)
+		return err
+	}
+
 	caCert := &x509.Certificate{
-		SerialNumber: big.NewInt(2019),
+		SerialNumber: srl,
 		Subject: pkix.Name{
-			Organization:       []string{conf.Organization},
-			OrganizationalUnit: []string{conf.OrganizationalUnit},
-			Country:            []string{conf.Country},
-			CommonName:         conf.Name,
+			Organization:       []string{cfg.Config.Organization},
+			OrganizationalUnit: []string{cfg.Config.OrganizationalUnit},
+			Country:            []string{cfg.Config.Country},
+			CommonName:         cfg.Config.Name,
 		},
 		Issuer: pkix.Name{
-			Organization:       []string{conf.Organization},
-			OrganizationalUnit: []string{conf.OrganizationalUnit},
-			Country:            []string{conf.Country},
-			CommonName:         conf.Name,
+			Organization:       []string{cfg.Config.Organization},
+			OrganizationalUnit: []string{cfg.Config.OrganizationalUnit},
+			Country:            []string{cfg.Config.Country},
+			CommonName:         cfg.Config.Name,
 		},
 		NotBefore:             time.Now(),
 		NotAfter:              time.Now().AddDate(10, 0, 0),
@@ -122,12 +131,14 @@ func SetupAuthority(conf model.SetupConfig, pass []byte) error {
 		logger.Error("%v", err)
 		return err
 	}
-	data.Publish(file, conf.Name+".cer")
+	data.Publish(file, cfg.Config.Name+".cer")
 	err = PublishRevocationList()
 	if err != nil {
 		logger.Error("%v", err)
 		return err
 	}
+
+	updateLastSerial(srl)
 
 	return nil
 }

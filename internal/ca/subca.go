@@ -11,8 +11,10 @@ import (
 	"deleteonerror.com/tyinypki/internal/request"
 )
 
-func SetupSubAuthority(conf model.SetupConfig, pass []byte) error {
+func SetupSubAuthority(initConfig model.Config, pass []byte) error {
 	PassPhrase = pass
+
+	updateConfiguration(initConfig)
 
 	privateKey, err := createPrivateKey(pass)
 	if err != nil {
@@ -20,9 +22,9 @@ func SetupSubAuthority(conf model.SetupConfig, pass []byte) error {
 		return err
 	}
 
-	rawRequest := request.CreateSubCaRequest(conf, *privateKey)
+	rawRequest := request.CreateSubCaRequest(cfg.Config, *privateKey)
 
-	reqFile, err := data.WriteRawRequest(rawRequest, conf.Name)
+	reqFile, err := data.WriteRawRequest(rawRequest, cfg.Config.Name)
 	if err != nil {
 		logger.Error("%v", err)
 		return err
@@ -38,6 +40,7 @@ func VerifySubAuthority(pass []byte) {
 
 	key := getPrivateKey()
 	cert := getCaCertificate()
+	getConfiguration()
 
 	if len(cert.Raw) == 0 {
 		certs, err := data.GetIncommingSubCer()
@@ -97,4 +100,6 @@ func VerifySubAuthority(pass []byte) {
 	} else {
 		logger.Info("last published crl ist valid.")
 	}
+
+	RevokeCertificates()
 }

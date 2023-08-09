@@ -14,17 +14,12 @@ import (
 )
 
 func PublishRevocationList() error {
-	n, err := getNextCRLNumber()
-	if err != nil {
-		logger.Error("%v", err)
-		return err
-	}
-	file, err := generateCRL(n)
-	if err != nil {
-		logger.Error("%v", err)
-		return err
-	}
 
+	file, err := generateCRL()
+	if err != nil {
+		logger.Error("%v", err)
+		return err
+	}
 	if file == "" {
 		return nil
 	}
@@ -54,29 +49,7 @@ func getLatestCRL() (*x509.RevocationList, error) {
 	return crl, nil
 }
 
-func getNextCRLNumber() (*big.Int, error) {
-	data, err := data.GetLatestCRL()
-	if err != nil {
-		logger.Error("%v", err)
-		return nil, err
-	}
-	if data == nil {
-		return new(big.Int), nil
-	}
-
-	block, _ := pem.Decode(data)
-	crl, err := x509.ParseRevocationList(block.Bytes)
-	if err != nil {
-		logger.Error("%v", err)
-		return nil, err
-	}
-
-	crlNumber := crl.Number
-
-	return crlNumber.Add(crlNumber, big.NewInt(1)), nil
-}
-
-func generateCRL(number *big.Int) (string, error) {
+func generateCRL() (string, error) {
 
 	rawCerts, err := data.GetRevokedCertificatesFromCaStore()
 	if err != nil {
@@ -90,11 +63,8 @@ func generateCRL(number *big.Int) (string, error) {
 		return "", err
 	}
 
-	nextId, err := getNextCRLNumber()
-	if err != nil {
-		logger.Error("%v", err)
-		return "", err
-	}
+	nextId := cfg.Config.LastCRLNumber
+	nextId.Add(nextId, big.NewInt(1))
 
 	cert := getCaCertificate()
 
@@ -125,6 +95,7 @@ func generateCRL(number *big.Int) (string, error) {
 		return "", err
 	}
 
+	updateLastCrl(nextId)
 	return filename, nil
 }
 
