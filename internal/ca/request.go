@@ -41,8 +41,7 @@ func getKeyUsage(csr x509.CertificateRequest) (x509.KeyUsage, error) {
 				return x509.KeyUsageDigitalSignature, errors.New("no keyusage found")
 			}
 
-			x509KU := x509.KeyUsage(ku.At(0)<<7 | ku.At(1)<<6 | ku.At(2)<<5 | ku.At(3)<<4 |
-				ku.At(4)<<3 | ku.At(5)<<2 | ku.At(6)<<1 | ku.At(7))
+			x509KU := x509.KeyUsage(ku.BitLength)
 
 			return x509KU, nil
 		}
