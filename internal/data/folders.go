@@ -3,6 +3,7 @@ package data
 import (
 	"os"
 	"path/filepath"
+	"syscall"
 
 	"deleteonerror.com/tyinypki/internal/logger"
 )
@@ -48,12 +49,14 @@ func SetupFolders() {
 }
 
 func createAndLogDir(f folder) {
+	oldUmask := syscall.Umask(0)
 	err := os.MkdirAll(f.path, f.perms)
 	if err != nil {
 		logger.Error("Failed to create directory %v", err)
 	} else {
-		logger.Debug("Created %s as %s directory at %s", f.name, f.dirType, f.path)
+		logger.Debug("Created %s as %s directory at %s with permissions %v", f.name, f.dirType, f.path, f.perms)
 	}
+	syscall.Umask(oldUmask)
 }
 
 type folder struct {
