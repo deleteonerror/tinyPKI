@@ -10,6 +10,7 @@ import (
 
 	"deleteonerror.com/tyinypki/internal/data"
 	"deleteonerror.com/tyinypki/internal/logger"
+	"deleteonerror.com/tyinypki/internal/model"
 )
 
 func PublishRevocationList() error {
@@ -77,7 +78,7 @@ func getNextCRLNumber() (*big.Int, error) {
 
 func generateCRL(number *big.Int) (string, error) {
 
-	rawCerts, err := data.GetRevokedCertificates()
+	rawCerts, err := data.GetRevokedCertificatesFromCaStore()
 	if err != nil {
 		logger.Error("%v", err)
 		return "", err
@@ -127,7 +128,7 @@ func generateCRL(number *big.Int) (string, error) {
 	return filename, nil
 }
 
-func convertCertificatesToCRL(certificates []data.FileContentWithPath) ([]pkix.RevokedCertificate, error) {
+func convertCertificatesToCRL(certificates []model.FileContentWithPath) ([]pkix.RevokedCertificate, error) {
 	result := []pkix.RevokedCertificate{}
 
 	for _, cert := range certificates {

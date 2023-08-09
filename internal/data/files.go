@@ -281,7 +281,7 @@ func WriteCRL(data []byte, id string) (string, error) {
 	return path, nil
 }
 
-func GetRevokedCertificates() ([]FileContentWithPath, error) {
+func GetRevokedCertificatesFromCaStore() ([]model.FileContentWithPath, error) {
 	src := getFolderByName("ca-revoked")
 
 	files, err := getFilesInFolder(src.path)
@@ -303,7 +303,7 @@ func ReadCaCertificate() ([]byte, error) {
 	return readFile(path)
 }
 
-func GetIncommingSubCer() ([]FileContentWithPath, error) {
+func GetIncommingSubCer() ([]model.FileContentWithPath, error) {
 	src := getFolderByName("ca-cert-in")
 	files, err := getFilesInFolder(src.path)
 	if err != nil {
@@ -317,8 +317,8 @@ func GetIncommingSubCer() ([]FileContentWithPath, error) {
 	return files, nil
 }
 
-func getFilesInFolder(path string) ([]FileContentWithPath, error) {
-	var filePaths []FileContentWithPath
+func getFilesInFolder(path string) ([]model.FileContentWithPath, error) {
+	var filePaths []model.FileContentWithPath
 
 	files, err := os.ReadDir(path)
 	if err != nil {
@@ -334,7 +334,7 @@ func getFilesInFolder(path string) ([]FileContentWithPath, error) {
 				logger.Error("could not read %s: %v", filePath, err)
 				continue
 			}
-			current := FileContentWithPath{Name: file.Name(), Data: content, Path: filePath}
+			current := model.FileContentWithPath{Name: file.Name(), Data: content, Path: filePath}
 
 			filePaths = append(filePaths, current)
 		}
@@ -352,12 +352,6 @@ func readFile(path string) ([]byte, error) {
 	return data, nil
 }
 
-type FileContentWithPath struct {
-	Name string
-	Data []byte
-	Path string
-}
-
 func GetX509CertificateRequest(path string) ([]byte, error) {
 	raw, err := readFile(path)
 	if err != nil {
@@ -369,7 +363,7 @@ func GetX509CertificateRequest(path string) ([]byte, error) {
 
 }
 
-func GetCaCertificateRequests() ([]FileContentWithPath, error) {
+func GetCaCertificateRequests() ([]model.FileContentWithPath, error) {
 	src := getFolderByName("ca-req")
 
 	files, err := getFilesInFolder(src.path)
@@ -384,7 +378,7 @@ func GetCaCertificateRequests() ([]FileContentWithPath, error) {
 	return files, nil
 }
 
-func GetCertificateRequests() ([]FileContentWithPath, error) {
+func GetCertificateRequests() ([]model.FileContentWithPath, error) {
 	src := getFolderByName("requests")
 
 	files, err := getFilesInFolder(src.path)

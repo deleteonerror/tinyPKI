@@ -97,5 +97,4 @@ func VerifySubAuthority(pass []byte) {
 	} else {
 		logger.Info("last published crl ist valid.")
 	}
-
 }
