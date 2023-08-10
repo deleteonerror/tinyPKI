@@ -41,7 +41,7 @@ func IssuePendingCaRequests() error {
 			logger.Error("Failed to Issue request %s: %v", req.Name, err)
 			continue
 		}
-		data.ArchiveRequest(req.Name)
+		data.ArchiveRequest(req.Path, req.Name)
 	}
 
 	return nil
@@ -78,7 +78,7 @@ func IssuePendingRequests() error {
 			logger.Error("Failed to Issue request %s: %v", req.Name, err)
 			continue
 		}
-		data.ArchiveRequest(req.Name)
+		data.ArchiveRequest(req.Path, req.Name)
 	}
 
 	return nil

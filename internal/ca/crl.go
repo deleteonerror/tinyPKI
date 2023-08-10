@@ -102,16 +102,14 @@ func generateCRL() (string, error) {
 func convertCertificatesToCRL(certificates []model.FileContentWithPath) ([]pkix.RevokedCertificate, error) {
 	result := []pkix.RevokedCertificate{}
 
-	for _, cert := range certificates {
-		cert, err := parseCertificate(cert.Data)
+	for _, certFile := range certificates {
+		cert, err := parseCertificate(certFile.Data)
 		if err != nil || len(cert.Raw) == 0 || cert.NotAfter.Before(time.Now()) {
 			continue
 		}
-		// ToDo: revocation date is wrong and I have to find a better solution like
-		// reading the old crl and use the date from the old crl or store the revocation in fs
 		revokedCert := pkix.RevokedCertificate{
 			SerialNumber:   cert.SerialNumber,
-			RevocationTime: time.Now(),
+			RevocationTime: certFile.PrefixDate,
 		}
 
 		result = append(result, revokedCert)

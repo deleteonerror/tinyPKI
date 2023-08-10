@@ -284,8 +284,7 @@ func ImportRevokedCertificate(in model.FileContentWithPath) error {
 
 	_, err := os.Stat(src)
 	if err == nil {
-		// file exists so we move them
-		prefix := time.Now().Format("2006-01-02_15-04-05_")
+		prefix := time.Now().UTC().Format("2006-01-02_15-04-05_")
 		targetPath := filepath.Join(destDir.path, prefix+in.Name)
 
 		if err := os.Rename(src, targetPath); err != nil {
@@ -433,10 +432,10 @@ func Issued(src string) error {
 	return nil
 }
 
-func ArchiveRequest(file string) {
-	srcFolder := getFolderByName("requests")
+func ArchiveRequest(path, file string) {
+	srcFolder := folder{path: path, name: file}
 	logger.Debug("Archiving request %s", file)
-	moveOld(*srcFolder, file)
+	moveOld(srcFolder, file)
 }
 
 func Delete(path string) error {
