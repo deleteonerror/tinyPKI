@@ -13,11 +13,11 @@ build-req:
 
 config-sub:
 	mkdir -p $(CURDIR)/bin/sub_data/work
-	cp configs/tinypki.sub.example.json $(CURDIR)/bin/sub_data/work/config.json
+	cp configs/tinypki.sub.example.json $(CURDIR)/bin/sub_data/work/sub.config.json
 
 config-root:
 	mkdir -p $(CURDIR)/bin/root_data/work
-	cp configs/tinypki.root.example.json $(CURDIR)/bin/root_data/work/config.json
+	cp configs/tinypki.root.example.json $(CURDIR)/bin/root_data/work/root.config.json
 
 run-root: build-root config-root
 	export TINY_ROOT_PATH=$(CURDIR)/bin/root_data; \

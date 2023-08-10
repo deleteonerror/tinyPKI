@@ -6,9 +6,74 @@ import (
 	"encoding/asn1"
 	"encoding/hex"
 	"fmt"
+	"net"
+	"strings"
 
+	"deleteonerror.com/tyinypki/internal/model"
 	"deleteonerror.com/tyinypki/internal/request"
 )
+
+func GetCertificateRequestInteractive() model.CertificateRequest {
+
+	csr := &model.CertificateRequest{}
+
+	fmt.Println("Enter comon name [example.com]: ")
+	fmt.Scanln(&csr.CommonName)
+	csr.IPAddresses = getIPAddressesInteractive()
+	csr.DNSNames = getDNSNamesInteractive()
+	csr.EmailAddresses = getEmailInteractive()
+
+	return *csr
+}
+
+func getIPAddressesInteractive() []net.IP {
+
+	fmt.Println("Enter a , separated list of IP Adresses: ")
+	ips := ""
+	fmt.Scanln(&ips)
+
+	cleaned := strings.TrimSpace(ips)
+	parts := strings.Split(cleaned, ",")
+
+	list, err := convertToIPs(parts)
+	if err != nil && len(list) > 0 {
+		fmt.Printf("%v\n", err)
+	}
+	return list
+
+}
+
+func convertToIPs(strings []string) ([]net.IP, error) {
+	var ips []net.IP
+	for _, s := range strings {
+		ip := net.ParseIP(s)
+		if ip == nil {
+			return nil, fmt.Errorf("invalid IP address: %s", s)
+		}
+		ips = append(ips, ip)
+	}
+	return ips, nil
+}
+
+func getDNSNamesInteractive() []string {
+	fmt.Println("Enter a , separated list of DNS Names: ")
+	dns := ""
+	fmt.Scanln(&dns)
+
+	cleaned := strings.TrimSpace(dns)
+	parts := strings.Split(cleaned, ",")
+	return parts
+}
+
+func getEmailInteractive() []string {
+	fmt.Println("Enter a , separated list of e-mail adresses: ")
+	mail := ""
+	fmt.Scanln(&mail)
+
+	cleaned := strings.TrimSpace(mail)
+	parts := strings.Split(cleaned, ",")
+	return parts
+}
 
 func PrintRequest(csr x509.CertificateRequest) {
 
@@ -40,7 +105,6 @@ func PrintRequest(csr x509.CertificateRequest) {
 	for _, uri := range csr.URIs {
 		fmt.Printf("URIs: %v\n", uri)
 	}
-
 }
 
 func writeExt(ext pkix.Extension) {

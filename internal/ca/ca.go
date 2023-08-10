@@ -59,7 +59,7 @@ func SetupAuthority(initConfig model.Config, pass []byte) error {
 
 	updateConfiguration(initConfig)
 
-	privateKey, err := createPrivateKey(pass)
+	privateKey, err := createEncryptedPrivateKey(pass)
 	if err != nil {
 		logger.Error("%v", err)
 		return err

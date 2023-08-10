@@ -29,3 +29,21 @@ func CreateSubCaRequest(conf model.Config, key ecdsa.PrivateKey) []byte {
 	}
 	return csrBytes
 }
+
+func CreateSimpleRequest(key ecdsa.PrivateKey, req model.CertificateRequest) ([]byte, error) {
+
+	csr := &x509.CertificateRequest{
+		Subject: pkix.Name{
+			CommonName: req.CommonName,
+		},
+		DNSNames:       req.DNSNames,
+		IPAddresses:    req.IPAddresses,
+		EmailAddresses: req.EmailAddresses,
+	}
+
+	csrBytes, err := x509.CreateCertificateRequest(rand.Reader, csr, &key)
+	if err != nil {
+		logger.Error("%v", err)
+	}
+	return csrBytes, nil
+}

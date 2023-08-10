@@ -75,7 +75,23 @@ func getRawPrivateKey(pass []byte) ([]byte, error) {
 	return x509DerEncoded, nil
 }
 
-func createPrivateKey(pass []byte) (*ecdsa.PrivateKey, error) {
+func CreatePrivateKey() ([]byte, ecdsa.PrivateKey, error) {
+	curve := elliptic.P384()
+	ecKey, err := ecdsa.GenerateKey(curve, rand.Reader)
+	if err != nil {
+		logger.Error("%v", err)
+		return nil, ecdsa.PrivateKey{}, err
+	}
+
+	x509DerEncoded, err := x509.MarshalECPrivateKey(ecKey)
+	if err != nil {
+		logger.Error("%v", err)
+		return nil, ecdsa.PrivateKey{}, err
+	}
+	return x509DerEncoded, *ecKey, nil
+}
+
+func createEncryptedPrivateKey(pass []byte) (*ecdsa.PrivateKey, error) {
 	curve := elliptic.P384()
 	ecKey, err := ecdsa.GenerateKey(curve, rand.Reader)
 	if err != nil {

@@ -101,6 +101,24 @@ func WriteRawRequest(csrBytes []byte, filename string) (string, error) {
 	return dest, nil
 }
 
+func WriteRawRequestHere(csrBytes []byte, filename string) (string, error) {
+
+	csrPEM := pem.EncodeToMemory(&pem.Block{
+		Type:  "CERTIFICATE REQUEST",
+		Bytes: csrBytes,
+	})
+
+	filename = filename + ".csr"
+	path := getAppPath()
+
+	dest := filepath.Join(path, filename)
+	if err := os.WriteFile(dest, csrPEM, 0666); err != nil {
+		logger.Error("%v", err)
+		return "", err
+	}
+	return dest, nil
+}
+
 func WriteKey(encryptedKey []byte) error {
 
 	src := getFolderByName("ca-key")
@@ -125,6 +143,24 @@ func WriteKey(encryptedKey []byte) error {
 	}
 	logger.Info("Wrote %d bytes encrypted key.", bytesWritten)
 	return nil
+}
+
+func WriteRawPrivateKey(privateKey []byte, filename string) (string, error) {
+
+	pemBlock := pem.EncodeToMemory(&pem.Block{
+		Type:  "EC PRIVATE KEY",
+		Bytes: privateKey,
+	})
+
+	filename = filename + ".key"
+	path := getAppPath()
+
+	dest := filepath.Join(path, filename)
+	if err := os.WriteFile(dest, pemBlock, 0600); err != nil {
+		logger.Error("%v", err)
+		return "", err
+	}
+	return dest, nil
 }
 
 func WriteKeyNonce(nonce []byte) error {
