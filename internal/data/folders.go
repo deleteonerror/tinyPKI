@@ -37,11 +37,11 @@ func initFolders() {
 		{"ca-publish", filepath.Join(WorkPath, "publish"), 0775, "out"},    // Out folder which contains ca certs and crl's for publishing to aia and cdp
 		{"ca-req", filepath.Join(WorkPath, "reqests", "ca"), 0775, "out"},
 		{"ca-cert-in", filepath.Join(WorkPath, "certificates", "ca"), 0775, "in"},
-		{"webserver-requests", filepath.Join(WorkPath, "reqests", "webserver"), 0775, "in"}, // The folder for incoming Certificate Requests
-		{"client-requests", filepath.Join(WorkPath, "reqests", "client"), 0775, "in"},       // The folder for incoming Certificate Requests
-		{"code-requests", filepath.Join(WorkPath, "reqests", "webserver"), 0775, "in"},      // The folder for incoming Certificate Requests
-		{"server-requests", filepath.Join(WorkPath, "reqests", "server"), 0775, "in"},       // The folder for incoming Certificate Requests
-		{"ocsp-requests", filepath.Join(WorkPath, "reqests", "ocsp"), 0775, "in"},           // The folder for incoming Certificate Requests
+		{"webserver-requests", filepath.Join(WorkPath, "reqests", "webserver"), 0775, "in"},
+		{"client-requests", filepath.Join(WorkPath, "reqests", "client"), 0775, "in"},
+		{"code-requests", filepath.Join(WorkPath, "reqests", "code"), 0775, "in"},
+		{"server-requests", filepath.Join(WorkPath, "reqests", "server"), 0775, "in"},
+		{"ocsp-requests", filepath.Join(WorkPath, "reqests", "ocsp"), 0775, "in"},
 	}
 }
 

@@ -27,7 +27,7 @@ How to issue request will be described in the usage documentation [here](./usage
 
 2. download or create the config files
 
-    The raw files are located [root](https://raw.githubusercontent.com/deleteonerror/tinyPKI/main/configs/tinypki.root.example.json) [sub](https://raw.githubusercontent.com/deleteonerror/tinyPKI/main/configs/tinypki.sub.example.json)  
+    The raw files are located here [root](https://raw.githubusercontent.com/deleteonerror/tinyPKI/main/configs/tinypki.root.example.json) | [sub](https://raw.githubusercontent.com/deleteonerror/tinyPKI/main/configs/tinypki.sub.example.json)  
     or just use `wget` >>
 
     ``` shell
@@ -134,7 +134,7 @@ docker exec -it <id of your tiny_pki_SUB container> sh tpkisub
 
 \* *you don't need to type the full id, the start of the container id is enough as long at it is unique.*
   
-this will open a shell inside the container. Make sure you chose a save and secure passphrase.
+this will open a shell inside the Sub CA container. *Make sure you chose a unique and secure passphrase.*
 
 ## Initialize the Root Certificate Authority
 
@@ -152,7 +152,7 @@ docker exec -it <id of your tiny_pki_ROOT container> sh tpkiroot
 
 \* *you don't need to type the full id, the start of the container id is enough as long at it is unique.*
   
-this will open a shell inside the container. Make sure you chose a save and secure passphrase.
+this will open a shell inside the Root CA container. *Make sure you chose a unique and secure passphrase.*
 
 ## Finalize
 

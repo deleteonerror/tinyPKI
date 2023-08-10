@@ -19,11 +19,15 @@ All keys are generated using *ECDSA 384* and are stored encrypted with *chacha20
 | Directory | Used for |
 | --- | --- |
 | `/var/tinyPKI/reqests` | The folder for incoming certificate request |
+| `/var/tinyPKI/reqests/webserver` | The folder for incoming `WebServer` certificate request |
+| `/var/tinyPKI/reqests/client` | The folder for incoming `Client` certificate request |
+| `/var/tinyPKI/reqests/code` | The folder for incoming `CodeSigning` certificate request |
+| `/var/tinyPKI/reqests/server` | The folder for incoming `Server` certificate request |
+| `/var/tinyPKI/reqests/ocsp` | The folder for incoming `OCSP` certificate request |
 | `/var/tinyPKI/reqests/ca` | The folder for incoming Subordinary or Intermediate certificate requests to the *tiny_pki_root* |
 | `/var/tinyPKI/certificates` | The folder for ISSUED certificates by the *tiny_pki_sub* |
 | `/var/tinyPKI/certificates/ca` | The folder for ISSUED ca certificates by the *tiny_pki_root* |
 | `/var/tinyPKI/revoke` | The folder for certificates which should be revoked by the *tiny_pki_sub* |
-| `/var/tinyPKI/publish` | The folder where all ca's publish their certificates and revocation lists |
 
 ### Validity Periods
 
@@ -37,7 +41,7 @@ All keys are generated using *ECDSA 384* and are stored encrypted with *chacha20
 
 Submitting a certificate request is a straightforward process:
 
-1. Place your request in the `/var/tinyPKI/requests` directory.
+1. Place your request in the directory `/var/tinyPKI/requests` or in any subdirectory of this path, depending on your certificate needs. Refer to the directory table to select the correct directory.
 2. Retrieve the container ID of your *tiny_pki_sub* instance.
 3. Execute the following command: `docker exec -it <id of your tiny_pki_SUB container> sh -c tpkisub`.
 4. Enter your passphrase when prompted. If there are any errors, they will be displayed in the command line.
