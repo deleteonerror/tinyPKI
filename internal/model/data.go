@@ -15,13 +15,16 @@ type FileContentWithPath struct {
 	// PrefixDate is the date prefix associated with the file.
 	// This will default to the current time in UTC if not explicitly set.
 	PrefixDate time.Time
+
+	RequestType string
 }
 
 func NewFileContentWithPath(name string, data []byte, path string) *FileContentWithPath {
 	return &FileContentWithPath{
-		Name:       name,
-		Data:       data,
-		Path:       path,
-		PrefixDate: time.Now().UTC(),
+		Name:        name,
+		Data:        data,
+		Path:        path,
+		PrefixDate:  time.Now().UTC(),
+		RequestType: "",
 	}
 }

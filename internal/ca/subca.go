@@ -41,7 +41,7 @@ func VerifySubAuthority(pass []byte) {
 	key := getPrivateKey()
 	cert := getCaCertificate()
 	getConfiguration()
-
+	data.SetupFolders()
 	if len(cert.Raw) == 0 {
 		certs, err := data.GetIncommingSubCer()
 		if err != nil {

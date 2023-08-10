@@ -38,6 +38,10 @@ func initFolders() {
 		{"ca-req", filepath.Join(WorkPath, "reqests", "ca"), 0775, "out"},
 		{"ca-cert-in", filepath.Join(WorkPath, "certificates", "ca"), 0775, "in"},
 		{"webserver-requests", filepath.Join(WorkPath, "reqests", "webserver"), 0775, "in"}, // The folder for incoming Certificate Requests
+		{"client-requests", filepath.Join(WorkPath, "reqests", "client"), 0775, "in"},       // The folder for incoming Certificate Requests
+		{"code-requests", filepath.Join(WorkPath, "reqests", "webserver"), 0775, "in"},      // The folder for incoming Certificate Requests
+		{"server-requests", filepath.Join(WorkPath, "reqests", "server"), 0775, "in"},       // The folder for incoming Certificate Requests
+		{"ocsp-requests", filepath.Join(WorkPath, "reqests", "ocsp"), 0775, "in"},           // The folder for incoming Certificate Requests
 	}
 }
 

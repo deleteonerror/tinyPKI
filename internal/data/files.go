@@ -385,19 +385,32 @@ func GetCaCertificateRequests() ([]model.FileContentWithPath, error) {
 	return files, nil
 }
 
-func GetCertificateRequests() ([]model.FileContentWithPath, error) {
-	src := getFolderByName("requests")
+func GetCertificateRequests() []model.FileContentWithPath {
 
-	files, err := getFilesInFolder(src.path)
-	if err != nil {
-		logger.Error("%v", err)
-		return nil, err
+	directories := []string{"webserver-requests", "client-requests", "code-requests", "server-requests", "ocsp-requests", "requests"}
+	var result []model.FileContentWithPath
+
+	for _, dir := range directories {
+
+		src := getFolderByName(dir)
+
+		files, err := getFilesInFolder(src.path)
+		if err != nil {
+			logger.Error("%v", err)
+		}
+
+		for _, f := range files {
+			f.RequestType = dir
+			result = append(result, f)
+		}
 	}
-	if len(files) == 0 {
+
+	if len(result) == 0 {
 		logger.Debug("No new certificate requests found to issue")
-		return nil, nil
+		return nil
 	}
-	return files, nil
+
+	return result
 }
 
 func Publish(src string, destName string) error {
