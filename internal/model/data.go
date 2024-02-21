@@ -1,6 +1,8 @@
 package model
 
-import "time"
+import (
+	"time"
+)
 
 type FileContentWithPath struct {
 	// The name of the file.
@@ -16,6 +18,8 @@ type FileContentWithPath struct {
 	// This will default to the current time in UTC if not explicitly set.
 	PrefixDate time.Time
 
+	PrefixFromName bool
+
 	RequestType string
 }
 
@@ -27,4 +31,12 @@ func NewFileContentWithPath(name string, data []byte, path string) *FileContentW
 		PrefixDate:  time.Now().UTC(),
 		RequestType: "",
 	}
+}
+
+func (file FileContentWithPath) GetPrefixedFileName() string {
+
+	if file.PrefixFromName {
+		return file.Name
+	}
+	return file.PrefixDate.Format("2006-01-02_15-04-05_") + file.Name
 }

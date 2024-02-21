@@ -8,7 +8,6 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
-	"time"
 
 	"deleteonerror.com/tyinypki/internal/logger"
 	"deleteonerror.com/tyinypki/internal/model"
@@ -320,10 +319,15 @@ func ImportRevokedCertificate(in model.FileContentWithPath) error {
 
 	_, err := os.Stat(src)
 	if err == nil {
-		prefix := time.Now().UTC().Format("2006-01-02_15-04-05_")
-		targetPath := filepath.Join(destDir.path, prefix+in.Name)
+		sourcePath := filepath.Join(in.Path, in.Name)
+		targetPath := filepath.Join(destDir.path, in.GetPrefixedFileName())
 
-		if err := os.Rename(src, targetPath); err != nil {
+		if strings.EqualFold(sourcePath, targetPath) {
+			logger.Debug("File not Renamed, already at the right location %s", sourcePath)
+			return nil
+		}
+
+		if err := os.Rename(sourcePath, targetPath); err != nil {
 			logger.Error("Failed to move file %v", err)
 		} else {
 			logger.Debug("Moved file to %s", targetPath)

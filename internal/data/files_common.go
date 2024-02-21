@@ -42,8 +42,10 @@ func getFilesInFolder(path string) ([]model.FileContentWithPath, error) {
 			prefixDate, err := getDateFromFilename(name)
 			if err != nil {
 				logger.Debug("Could not get any date from %s: %v", name, err)
+			} else {
+				current.PrefixDate = prefixDate
+				current.PrefixFromName = true
 			}
-			current.PrefixDate = prefixDate
 
 			filePaths = append(filePaths, *current)
 		}
