@@ -36,6 +36,8 @@ func VerifyAuthority(pass []byte) {
 		logger.Info("Root certificate ist valid.")
 	}
 
+	RevokeCertificates()
+
 	crl, err := getLatestCRL()
 	if err != nil {
 		logger.Error("Unable not read last CRL: %v", err)
@@ -47,11 +49,15 @@ func VerifyAuthority(pass []byte) {
 
 	if crl.NextUpdate.Before(time.Now().AddDate(0, 0, 30)) {
 		logger.Warning("CRL will expire in less than 30 days")
+
+		err = PublishRevocationList()
+		if err != nil {
+			logger.Error("%v", err)
+		}
 	} else {
 		logger.Info("last published crl ist valid.")
 	}
 
-	RevokeCertificates()
 }
 
 func SetupAuthority(initConfig model.Config, pass []byte) error {
