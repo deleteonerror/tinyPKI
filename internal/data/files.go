@@ -328,7 +328,13 @@ func ImportRevokedCertificate(in model.FileContentWithPath) error {
 		}
 
 		if err := os.Rename(sourcePath, targetPath); err != nil {
-			logger.Error("Failed to move file %v", err)
+
+			if strings.Contains(err.Error(), "cross-device") {
+				if err := moveHard(sourcePath, targetPath); err != nil {
+					return err
+				}
+			}
+
 		} else {
 			logger.Debug("Moved file to %s", targetPath)
 		}
@@ -494,7 +500,29 @@ func ArchiveRequest(path, file string) {
 func Delete(path string) error {
 	err := os.Remove(path)
 	if err != nil {
-		logger.Error("%v", err)
+		return err
 	}
 	return nil
+}
+
+func moveHard(src string, dst string) error {
+	fin, err := os.Open(src)
+	if err != nil {
+		return err
+	}
+	defer fin.Close()
+
+	fout, err := os.Create(dst)
+	if err != nil {
+		return err
+	}
+	defer fout.Close()
+
+	_, err = io.Copy(fout, fin)
+	if err != nil {
+		return err
+	}
+
+	err = os.Remove(src)
+	return err
 }
