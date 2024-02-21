@@ -82,7 +82,7 @@ func VerifySubAuthority(pass []byte) {
 	if cert.NotAfter.Before(time.Now().AddDate(0, 0, 90)) {
 		logger.Warning("Sub Ca cert will expire in less than 90 days.")
 	} else {
-		logger.Info("Sub Ca certificate ist valid.")
+		logger.Info("Sub Ca certificate is valid.")
 	}
 
 	crl, err := getLatestCRL()
@@ -98,7 +98,7 @@ func VerifySubAuthority(pass []byte) {
 	if crl.NextUpdate.Before(time.Now().AddDate(0, 0, 30)) {
 		logger.Warning("CRL will expire in less than 30 days")
 	} else {
-		logger.Info("last published crl ist valid.")
+		logger.Info("last published crl is valid.")
 	}
 
 	RevokeCertificates()

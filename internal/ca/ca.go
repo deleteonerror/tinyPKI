@@ -33,7 +33,7 @@ func VerifyAuthority(pass []byte) {
 	if cert.NotAfter.Before(time.Now().AddDate(0, 0, 90)) {
 		logger.Warning("Root cert will expire in less than 90 days.")
 	} else {
-		logger.Info("Root certificate ist valid.")
+		logger.Info("Root certificate is valid.")
 	}
 
 	RevokeCertificates()
@@ -55,7 +55,7 @@ func VerifyAuthority(pass []byte) {
 			logger.Error("%v", err)
 		}
 	} else {
-		logger.Info("last published crl ist valid.")
+		logger.Info("last published crl is valid.")
 	}
 
 }
